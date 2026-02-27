@@ -7,40 +7,37 @@
       <span class="note">Please fill all fields carefully. Your application will be reviewed by the admin.</span>
     </div>
 
-    <form class="application-form">
+    <form class="application-form" (ngSubmit)="onSubmit()">
 
       <!-- Personal Information -->
       <div class="section-title">Personal Information</div>
 
-      
-      
-
       <div class="form-row">
         <div class="form-group">
           <label>First Name (French)</label>
-          <input type="text" placeholder="Prénom" />
+          <input type="text" placeholder="Prénom" [(ngModel)]="firstNameFr" name="firstNameFr" />
         </div>
         <div class="form-group">
           <label>Last Name (French)</label>
-          <input type="text" placeholder="Nom" />
+          <input type="text" placeholder="Nom" [(ngModel)]="lastNameFr" name="lastNameFr" />
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Date of Birth</label>
-          <input type="date" />
+          <input type="date" [(ngModel)]="dateOfBirth" name="dateOfBirth" />
         </div>
         <div class="form-group">
           <label>Place of Birth</label>
-          <input type="text" placeholder="e.g. Tunis" />
+          <input type="text" placeholder="e.g. Tunis" [(ngModel)]="placeOfBirth" name="placeOfBirth" />
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Gender</label>
-          <select>
+          <select [(ngModel)]="gender" name="gender">
             <option value="" disabled selected>Select gender</option>
             <option>Male</option>
             <option>Female</option>
@@ -48,18 +45,18 @@
         </div>
         <div class="form-group">
           <label>Nationality</label>
-          <input type="text" placeholder="e.g. Tunisian" />
+          <input type="text" placeholder="e.g. Tunisian" [(ngModel)]="nationality" name="nationality" />
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>National ID (CIN)</label>
-          <input type="text" placeholder="Enter your CIN number" />
+          <input type="text" placeholder="Enter your CIN number" [(ngModel)]="cin" name="cin" />
         </div>
         <div class="form-group">
           <label>CIN Issue Date</label>
-          <input type="date" />
+          <input type="date" [(ngModel)]="cinIssueDate" name="cinIssueDate" />
         </div>
       </div>
 
@@ -68,29 +65,29 @@
 
       <div class="form-group">
         <label>Email Address</label>
-        <input type="email" placeholder="example@email.com" />
+        <input type="email" placeholder="example@email.com" [(ngModel)]="email" name="email" />
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Phone Number</label>
-          <input type="tel" placeholder="+216 XX XXX XXX" />
+          <input type="tel" placeholder="+216 XX XXX XXX" [(ngModel)]="phone" name="phone" />
         </div>
         <div class="form-group">
           <label>Emergency Contact (Parent/Guardian)</label>
-          <input type="tel" placeholder="+216 XX XXX XXX" />
+          <input type="tel" placeholder="+216 XX XXX XXX" [(ngModel)]="emergencyContact" name="emergencyContact" />
         </div>
       </div>
 
       <div class="form-group">
         <label>Address</label>
-        <input type="text" placeholder="Street, City" />
+        <input type="text" placeholder="Street, City" [(ngModel)]="address" name="address" />
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>Governorate</label>
-          <select>
+          <select [(ngModel)]="governorate" name="governorate">
             <option value="" disabled selected>Select governorate</option>
             <option>Tunis</option>
             <option>Ariana</option>
@@ -120,7 +117,7 @@
         </div>
         <div class="form-group">
           <label>Postal Code</label>
-          <input type="text" placeholder="e.g. 1000" />
+          <input type="text" placeholder="e.g. 1000" [(ngModel)]="postalCode" name="postalCode" />
         </div>
       </div>
 
@@ -130,11 +127,11 @@
       <div class="form-row">
         <div class="form-group">
           <label>Baccalaureate Year</label>
-          <input type="number" placeholder="e.g. 2024" />
+          <input type="number" placeholder="e.g. 2024" [(ngModel)]="bacYear" name="bacYear" />
         </div>
         <div class="form-group">
           <label>Baccalaureate Session</label>
-          <select>
+          <select [(ngModel)]="bacSession" name="bacSession">
             <option value="" disabled selected>Select session</option>
             <option>Main (Principale)</option>
             <option>Control (Contrôle)</option>
@@ -145,7 +142,7 @@
       <div class="form-row">
         <div class="form-group">
           <label>Baccalaureate Section</label>
-          <select>
+          <select [(ngModel)]="bacSection" name="bacSection">
             <option value="" disabled selected>Select section</option>
             <option>Mathematics</option>
             <option>Sciences</option>
@@ -158,13 +155,13 @@
         </div>
         <div class="form-group">
           <label>Baccalaureate Grade</label>
-          <input type="number" placeholder="e.g. 14.75" step="0.01" min="10" max="20" />
+          <input type="number" placeholder="e.g. 14.75" step="0.01" min="10" max="20" [(ngModel)]="bacGrade" name="bacGrade" />
         </div>
       </div>
 
       <div class="form-group">
         <label>Previous High School</label>
-        <input type="text" placeholder="Name of your high school" />
+        <input type="text" placeholder="Name of your high school" [(ngModel)]="highSchool" name="highSchool" />
       </div>
 
       <!-- Academic Preferences -->
@@ -172,7 +169,7 @@
 
       <div class="form-group">
         <label>Desired Department</label>
-        <select>
+        <select [(ngModel)]="department" name="department">
           <option value="" disabled selected>Select department</option>
           <option>Computer Science</option>
           <option>Mathematics</option>
@@ -184,8 +181,11 @@
 
       <div class="form-group">
         <label>Additional Notes (optional)</label>
-        <textarea placeholder="Any additional information you'd like to share..."></textarea>
+        <textarea placeholder="Any additional information you'd like to share..." [(ngModel)]="notes" name="notes"></textarea>
       </div>
+
+      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="success-message" *ngIf="successMessage">{{ successMessage }}</div>
 
       <button type="submit" class="btn-submit">Submit Application</button>
 

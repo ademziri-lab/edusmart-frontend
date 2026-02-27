@@ -164,3 +164,15 @@
     padding: 30px 20px;
   }
 }
+
+.error-message {
+  color: #ff4d4d;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.success-message {
+  color: #00d4ff;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}

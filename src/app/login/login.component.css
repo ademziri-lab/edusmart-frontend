@@ -106,3 +106,9 @@
   opacity: 1;
   color: #00d4ff;
 }
+
+.error-message {
+  color: #ff4d4d;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
