@@ -28,10 +28,18 @@ export class LoginComponent {
       return;
     }
 
-    
+
     if (this.email === 'admin@edusmart.com' && this.password === 'admin123') {
       this.router.navigate(['/dashboard']);
-    } else {
+    }
+    else if (this.email === 'student@edusmart.com' && this.password === 'student123') {
+      this.router.navigate(['/student-dashboard']);
+      return;
+    } else if (this.email === 'teacher@edusmart.com' && this.password === 'teacher123') {
+      this.router.navigate(['/teacher-dashboard']);
+      return;
+    }
+    else {
       this.errorMessage = 'Invalid email or password.';
     }
   }
