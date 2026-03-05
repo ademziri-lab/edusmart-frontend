@@ -62,23 +62,36 @@ interface Internship {
 })
 export class DashboardComponent implements OnInit {
 
-  showAddTeacherModal: boolean = false;
   activeSection: string = 'applications';
+  loggedInName: string = '';
 
+  // Data
   applications: Application[] = [];
+  classes: Class[] = [];
+  teachers: Teacher[] = [];
+  internships: Internship[] = [];
 
-  classes: Class[] = [
-  ];
+  // Applications
+  showApplicationModal: boolean = false;
+  selectedApplication: any = null;
+  processingIds: Set<string> = new Set();
 
-  teachers: Teacher[] = [
+  // Teachers
+  showAddTeacherModal: boolean = false;
+  showEditTeacherModal: boolean = false;
+  selectedTeacher: any = null;
+  newTeacher = { fullName: '', email: '', department: '', subjects: '' };
+  editTeacher = { firstName: '', lastName: '', email: '', department: '', subjects: '' };
 
-  ];
+  // Classes
+  showAddClassModal: boolean = false;
+  showEditClassModal: boolean = false;
+  selectedClassForEdit: any = null;
+  newClass = { name: '', department: '', level: '', studentCount: 0, subjects: '' };
+  editClass = { name: '', department: '', level: '', studentCount: 0, subjects: '' };
 
-  internships: Internship[] = [
-  ];
-
-  selectedClass: string = 'DSI1';
-
+  // Timetable
+  selectedTimetableClass: string = 'DSI1';
   timetables: { [key: string]: TimetableSlot[] } = {
     'DSI1': [
       { time: '08:00 - 10:00', monday: 'Algorithms', tuesday: 'Mathematics', wednesday: '—', thursday: 'English', friday: 'Algorithms' },
@@ -106,35 +119,6 @@ export class DashboardComponent implements OnInit {
     ],
   };
 
-
-showEditTeacherModal: boolean = false;
-selectedTeacher: any = null;
-
-editTeacher = {
-  firstName: '',
-  lastName: '',
-  email: '',
-  department: '',
-  subjects: ''
-};  
-
-
-showAddClassModal: boolean = false;
-newClass = {
-  name: '',
-  department: '',
-  level: '',
-  studentCount: 0,
-  subjects: ''
-};
-
-  newTeacher = {
-    fullName: '',
-    email: '',
-    department: '',
-    subjects: ''
-  };
-
   constructor(
     private router: Router,
     private applicationService: ApplicationService,
@@ -145,63 +129,95 @@ newClass = {
   ) {}
 
   ngOnInit() {
-  this.loadApplications();
-  this.loadTeachers();
-  this.loadClasses();
-  this.loadInternships();
-}
+    this.loadCurrentUser();
+    this.loadApplications();
+    this.loadTeachers();
+    this.loadClasses();
+    this.loadInternships();
+  }
 
-  loadInternships() {
-  this.internshipService.getAllInternships().subscribe({
-    next: (data) => {
-      this.internships = data;
-    },
-    error: (err) => console.error('Error loading internships:', err)
-  });
-}
-
-  loadClasses() {
-  this.collegeClassService.getAllClasses().subscribe({
-    next: (data) => {
-      this.classes = data;
-    },
-    error: (err) => console.error('Error loading classes:', err)
-  });
-}
-
-  loadTeachers() {
-  this.teacherService.getAllTeachers().subscribe({
-    next: (data) => {
-      this.teachers = data;
-    },
-    error: (err) => console.error('Error loading teachers:', err)
-  });
-}
+  loadCurrentUser() {
+    const token = this.authService.getToken();
+    if (token) {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      this.loggedInName = payload.firstName + ' ' + payload.lastName;
+    }
+  }
 
   loadApplications() {
     this.applicationService.getAllApplications().subscribe({
-      next: (data) => {
-        this.applications = data;
-      },
-      error: (err) => {
-        console.error('Error loading applications:', err);
-      }
+      next: (data) => this.applications = data,
+      error: (err) => console.error('Error loading applications:', err)
+    });
+  }
+
+  loadTeachers() {
+    this.teacherService.getAllTeachers().subscribe({
+      next: (data) => this.teachers = data,
+      error: (err) => console.error('Error loading teachers:', err)
+    });
+  }
+
+  loadClasses() {
+    this.collegeClassService.getAllClasses().subscribe({
+      next: (data) => this.classes = data,
+      error: (err) => console.error('Error loading classes:', err)
+    });
+  }
+
+  loadInternships() {
+    this.internshipService.getAllInternships().subscribe({
+      next: (data) => this.internships = data,
+      error: (err) => console.error('Error loading internships:', err)
     });
   }
 
   // Applications
+  viewApplication(app: any) {
+    this.selectedApplication = app;
+    this.showApplicationModal = true;
+  }
+
+  closeApplicationModal() {
+    this.showApplicationModal = false;
+    this.selectedApplication = null;
+  }
+
   approveApplication(id: string) {
+    this.processingIds.add(id);
     this.applicationService.approveApplication(id).subscribe({
-      next: () => this.loadApplications(),
-      error: (err) => console.error(err)
+      next: () => {
+        this.processingIds.delete(id);
+        this.loadApplications();
+      },
+      error: (err) => {
+        this.processingIds.delete(id);
+        console.error(err);
+      }
     });
   }
 
   rejectApplication(id: string) {
+    this.processingIds.add(id);
     this.applicationService.rejectApplication(id).subscribe({
-      next: () => this.loadApplications(),
-      error: (err) => console.error(err)
+      next: () => {
+        this.processingIds.delete(id);
+        this.loadApplications();
+      },
+      error: (err) => {
+        this.processingIds.delete(id);
+        console.error(err);
+      }
     });
+  }
+
+  deleteApplication(id: string) {
+    if (confirm('Are you sure you want to delete this application?')) {
+      this.applicationService.deleteApplication(id).subscribe({
+        next: () => this.loadApplications(),
+        error: (err) => console.error(err)
+      });
+    }
   }
 
   getPendingApplications(): number {
@@ -217,51 +233,65 @@ newClass = {
   }
 
   // Teachers
-  openAddTeacherModal() {
-    this.showAddTeacherModal = true;
-  }
+  openAddTeacherModal() { this.showAddTeacherModal = true; }
 
   closeAddTeacherModal() {
     this.showAddTeacherModal = false;
     this.newTeacher = { fullName: '', email: '', department: '', subjects: '' };
   }
 
- addTeacher() {
-  if (!this.newTeacher.fullName || !this.newTeacher.email || !this.newTeacher.department || !this.newTeacher.subjects) {
-    return;
+  addTeacher() {
+    if (!this.newTeacher.fullName || !this.newTeacher.email || !this.newTeacher.department || !this.newTeacher.subjects) return;
+    const nameParts = this.newTeacher.fullName.split(' ');
+    const teacher = {
+      firstName: nameParts[0],
+      lastName: nameParts.slice(1).join(' '),
+      email: this.newTeacher.email,
+      department: this.newTeacher.department,
+      subjects: this.newTeacher.subjects,
+      role: 'TEACHER'
+    };
+    this.teacherService.addTeacher(teacher).subscribe({
+      next: () => { this.loadTeachers(); this.closeAddTeacherModal(); },
+      error: (err) => console.error('Error adding teacher:', err)
+    });
   }
 
-  const nameParts = this.newTeacher.fullName.split(' ');
-  const firstName = nameParts[0];
-  const lastName = nameParts.slice(1).join(' ');
+  openEditTeacherModal(teacher: any) {
+    this.selectedTeacher = teacher;
+    this.editTeacher = {
+      firstName: teacher.firstName,
+      lastName: teacher.lastName,
+      email: teacher.email,
+      department: teacher.department,
+      subjects: teacher.subjects
+    };
+    this.showEditTeacherModal = true;
+  }
 
-  const teacher = {
-    firstName: firstName,
-    lastName: lastName,
-    email: this.newTeacher.email,
-    password: 'teacher123',
-    department: this.newTeacher.department,
-    subjects: this.newTeacher.subjects,
-    role: 'TEACHER'
-  };
+  closeEditTeacherModal() {
+    this.showEditTeacherModal = false;
+    this.selectedTeacher = null;
+  }
 
-  console.log('Sending teacher:', teacher);
+  updateTeacher() {
+    if (!this.editTeacher.firstName || !this.editTeacher.email || !this.editTeacher.department) return;
+    this.teacherService.updateTeacher(this.selectedTeacher.id, this.editTeacher).subscribe({
+      next: () => { this.loadTeachers(); this.closeEditTeacherModal(); },
+      error: (err) => console.error('Error updating teacher:', err)
+    });
+  }
 
-  this.teacherService.addTeacher(teacher).subscribe({
-    next: () => {
-      this.loadTeachers();
-      this.closeAddTeacherModal();
-    },
-    error: (err) => {
-      console.log('Full error:', err);
-      console.log('Error message:', err.error);
+  deleteTeacher(id: string) {
+    if (confirm('Are you sure you want to delete this teacher?')) {
+      this.teacherService.deleteTeacher(id).subscribe({
+        next: () => this.loadTeachers(),
+        error: (err) => console.error(err)
+      });
     }
-  });
-}
-
-  getTotalTeachers(): number {
-    return this.teachers.length;
   }
+
+  getTotalTeachers(): number { return this.teachers.length; }
 
   getTotalDepartments(): number {
     return [...new Set(this.teachers.map(t => t.department))].length;
@@ -272,42 +302,112 @@ newClass = {
     return this.classes.reduce((total, c) => total + c.studentCount, 0);
   }
 
+  openAddClassModal() { this.showAddClassModal = true; }
+
+  closeAddClassModal() {
+    this.showAddClassModal = false;
+    this.newClass = { name: '', department: '', level: '', studentCount: 0, subjects: '' };
+  }
+
+  addClass() {
+    if (!this.newClass.name || !this.newClass.department || !this.newClass.level) return;
+    const classData = {
+      name: this.newClass.name,
+      department: this.newClass.department,
+      level: this.newClass.level,
+      studentCount: this.newClass.studentCount,
+      subjects: this.newClass.subjects.split(',').map((s: string) => s.trim())
+    };
+    this.collegeClassService.addClass(classData).subscribe({
+      next: () => { this.loadClasses(); this.closeAddClassModal(); },
+      error: (err) => console.error('Error adding class:', err)
+    });
+  }
+
+  openEditClassModal(collegeClass: any) {
+    this.selectedClassForEdit = collegeClass;
+    this.editClass = {
+      name: collegeClass.name,
+      department: collegeClass.department,
+      level: collegeClass.level,
+      studentCount: collegeClass.studentCount,
+      subjects: collegeClass.subjects.join(', ')
+    };
+    this.showEditClassModal = true;
+  }
+
+  closeEditClassModal() {
+    this.showEditClassModal = false;
+    this.selectedClassForEdit = null;
+  }
+
+  updateClass() {
+    if (!this.editClass.name || !this.editClass.department || !this.editClass.level) return;
+    const classData = {
+      name: this.editClass.name,
+      department: this.editClass.department,
+      level: this.editClass.level,
+      studentCount: this.editClass.studentCount,
+      subjects: this.editClass.subjects.split(',').map((s: string) => s.trim())
+    };
+    this.collegeClassService.updateClass(this.selectedClassForEdit.id, classData).subscribe({
+      next: () => { this.loadClasses(); this.closeEditClassModal(); },
+      error: (err) => console.error('Error updating class:', err)
+    });
+  }
+
+  deleteClass(id: string) {
+    if (confirm('Are you sure you want to delete this class?')) {
+      this.collegeClassService.deleteClass(id).subscribe({
+        next: () => this.loadClasses(),
+        error: (err) => console.error(err)
+      });
+    }
+  }
+
   // Timetable
   selectClass(className: string) {
-    this.selectedClass = className;
+    this.selectedTimetableClass = className;
   }
 
   getCurrentTimetable(): TimetableSlot[] {
-    return this.timetables[this.selectedClass] || [];
+    return this.timetables[this.selectedTimetableClass] || [];
   }
 
   // Internships
   approveInternship(id: string) {
-  this.internshipService.approveInternship(id).subscribe({
-    next: () => this.loadInternships(),
-    error: (err) => console.error(err)
-  });
-}
+    this.internshipService.approveInternship(id).subscribe({
+      next: () => this.loadInternships(),
+      error: (err) => console.error(err)
+    });
+  }
 
-rejectInternship(id: string) {
-  this.internshipService.rejectInternship(id).subscribe({
-    next: () => this.loadInternships(),
-    error: (err) => console.error(err)
-  });
-}
+  rejectInternship(id: string) {
+    this.internshipService.rejectInternship(id).subscribe({
+      next: () => this.loadInternships(),
+      error: (err) => console.error(err)
+    });
+  }
 
-getPendingInternships(): number {
-  return this.internships.filter(i => i.status === 'PENDING').length;
-}
+  deleteInternship(id: string) {
+    if (confirm('Are you sure you want to delete this internship?')) {
+      this.internshipService.deleteInternship(id).subscribe({
+        next: () => this.loadInternships(),
+        error: (err) => console.error(err)
+      });
+    }
+  }
 
-getApprovedInternships(): number {
-  return this.internships.filter(i => i.status === 'APPROVED').length;
-}
+  getPendingInternships(): number {
+    return this.internships.filter(i => i.status === 'PENDING').length;
+  }
+
+  getApprovedInternships(): number {
+    return this.internships.filter(i => i.status === 'APPROVED').length;
+  }
 
   // Sidebar
-  setSection(section: string) {
-    this.activeSection = section;
-  }
+  setSection(section: string) { this.activeSection = section; }
 
   getSectionTitle(): string {
     switch (this.activeSection) {
@@ -320,102 +420,5 @@ getApprovedInternships(): number {
     }
   }
 
-  openAddClassModal() {
-  this.showAddClassModal = true;
-}
-
-closeAddClassModal() {
-  this.showAddClassModal = false;
-  this.newClass = { name: '', department: '', level: '', studentCount: 0, subjects: '' };
-}
-
-addClass() {
-  if (!this.newClass.name || !this.newClass.department || !this.newClass.level) {
-    return;
-  }
-  const classData = {
-    name: this.newClass.name,
-    department: this.newClass.department,
-    level: this.newClass.level,
-    studentCount: this.newClass.studentCount,
-    subjects: this.newClass.subjects.split(',').map((s: string) => s.trim())
-  };
-  this.collegeClassService.addClass(classData).subscribe({
-    next: () => {
-      this.loadClasses();
-      this.closeAddClassModal();
-    },
-    error: (err) => console.error('Error adding class:', err)
-  });
-}
-
-openEditTeacherModal(teacher: any) {
-  this.selectedTeacher = teacher;
-  this.editTeacher = {
-    firstName: teacher.firstName,
-    lastName: teacher.lastName,
-    email: teacher.email,
-    department: teacher.department,
-    subjects: teacher.subjects
-  };
-  this.showEditTeacherModal = true;
-}
-
-closeEditTeacherModal() {
-  this.showEditTeacherModal = false;
-  this.selectedTeacher = null;
-}
-
-updateTeacher() {
-  if (!this.editTeacher.firstName || !this.editTeacher.email || !this.editTeacher.department) {
-    return;
-  }
-  this.teacherService.updateTeacher(this.selectedTeacher.id, this.editTeacher).subscribe({
-    next: () => {
-      this.loadTeachers();
-      this.closeEditTeacherModal();
-    },
-    error: (err) => console.error('Error updating teacher:', err)
-  });
-}
-
-deleteApplication(id: string) {
-  if (confirm('Are you sure you want to delete this application?')) {
-    this.applicationService.deleteApplication(id).subscribe({
-      next: () => this.loadApplications(),
-      error: (err) => console.error(err)
-    });
-  }
-}
-
-deleteTeacher(id: string) {
-  if (confirm('Are you sure you want to delete this teacher?')) {
-    this.teacherService.deleteTeacher(id).subscribe({
-      next: () => this.loadTeachers(),
-      error: (err) => console.error(err)
-    });
-  }
-}
-
-deleteClass(id: string) {
-  if (confirm('Are you sure you want to delete this class?')) {
-    this.collegeClassService.deleteClass(id).subscribe({
-      next: () => this.loadClasses(),
-      error: (err) => console.error(err)
-    });
-  }
-}
-
-deleteInternship(id: string) {
-  if (confirm('Are you sure you want to delete this internship?')) {
-    this.internshipService.deleteInternship(id).subscribe({
-      next: () => this.loadInternships(),
-      error: (err) => console.error(err)
-    });
-  }
-}
-  logout() {
-  this.authService.logout();
-}
-
+  logout() { this.authService.logout(); }
 }
