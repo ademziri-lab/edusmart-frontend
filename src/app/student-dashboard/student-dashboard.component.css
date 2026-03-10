@@ -530,8 +530,6 @@
 .btn-cancel:hover {
   border-color: white;
 }
-<<<<<<< HEAD
-=======
 .btn-download {
   padding: 5px 12px;
   background: rgba(0, 212, 255, 0.1);
@@ -576,4 +574,3 @@
 .btn-delete:hover {
   background: rgba(231, 76, 60, 0.3);
 }
->>>>>>> friend/master

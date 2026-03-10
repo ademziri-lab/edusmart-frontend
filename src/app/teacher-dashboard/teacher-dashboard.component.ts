@@ -5,10 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { ChatService } from '../services/chat.service';
 import { UserService } from '../services/user.service';
-<<<<<<< HEAD
-=======
 import { AssignmentService } from '../services/assignment.service';
->>>>>>> friend/master
 
 interface TimetableSlot {
   time: string;
@@ -19,25 +16,6 @@ interface TimetableSlot {
   friday: string;
 }
 
-<<<<<<< HEAD
-interface Assignment {
-  id: number;
-  class: string;
-  subject: string;
-  title: string;
-  dueDate: string;
-  submissions: number;
-  totalStudents: number;
-}
-
-interface Submission {
-  student: string;
-  submitted: boolean;
-  grade: number | null;
-}
-
-=======
->>>>>>> friend/master
 @Component({
   selector: 'app-teacher-dashboard',
   standalone: true,
@@ -51,10 +29,7 @@ export class TeacherDashboardComponent implements OnInit {
   loggedInName: string = '';
   currentUserId: string = '';
   currentUserName: string = '';
-<<<<<<< HEAD
-=======
   teacherId: string = '';
->>>>>>> friend/master
 
   profile = {
     firstName: '',
@@ -73,28 +48,6 @@ export class TeacherDashboardComponent implements OnInit {
     { time: '16:00 - 18:00', monday: '—', tuesday: 'DSI1 — Algorithms', wednesday: 'DSI3 — Data Structures', thursday: '—', friday: 'DSI2 — Data Structures' },
   ];
 
-<<<<<<< HEAD
-  // Assignments
-  assignments: Assignment[] = [
-    { id: 1, class: 'DSI1', subject: 'Algorithms', title: 'Exercise 1 — Sorting Algorithms', dueDate: '2024-10-15', submissions: 18, totalStudents: 30 },
-    { id: 2, class: 'DSI2', subject: 'Data Structures', title: 'Lab 2 — Linked Lists', dueDate: '2024-10-18', submissions: 25, totalStudents: 28 },
-    { id: 3, class: 'DSI3', subject: 'Algorithms', title: 'Project — Graph Traversal', dueDate: '2024-10-25', submissions: 10, totalStudents: 25 },
-  ];
-
-  showAssignmentModal: boolean = false;
-  showGradeModal: boolean = false;
-  selectedAssignment: Assignment | null = null;
-
-  newAssignment = {
-    class: '',
-    subject: '',
-    title: '',
-    dueDate: ''
-  };
-
-  gradeList: Submission[] = [];
-
-=======
   // Virtual Classroom
   assignments: any[] = [];
   showAddAssignmentModal: boolean = false;
@@ -113,7 +66,6 @@ export class TeacherDashboardComponent implements OnInit {
     fileType: ''
   };
 
->>>>>>> friend/master
   // Chat
   students: any[] = [];
   selectedStudent: string = '';
@@ -124,12 +76,8 @@ export class TeacherDashboardComponent implements OnInit {
     private router: Router,
     private chatService: ChatService,
     private authService: AuthService,
-<<<<<<< HEAD
-    private userService: UserService
-=======
     private userService: UserService,
     private assignmentService: AssignmentService
->>>>>>> friend/master
   ) {}
 
   ngOnInit() {
@@ -144,10 +92,7 @@ export class TeacherDashboardComponent implements OnInit {
       this.loggedInName = payload.firstName + ' ' + payload.lastName;
       this.currentUserId = payload.sub;
       this.currentUserName = payload.firstName + ' ' + payload.lastName;
-<<<<<<< HEAD
-=======
       this.teacherId = payload.sub;
->>>>>>> friend/master
       this.profile = {
         firstName: payload.firstName,
         lastName: payload.lastName,
@@ -163,22 +108,13 @@ export class TeacherDashboardComponent implements OnInit {
           this.currentMessages = [...this.currentMessages, message];
         }
       });
-<<<<<<< HEAD
-=======
       this.loadAssignments();
->>>>>>> friend/master
     }
   }
 
   loadStudents() {
     this.userService.getStudents().subscribe({
-<<<<<<< HEAD
-      next: (data) => {
-        this.students = data;
-      },
-=======
       next: (data) => { this.students = data; },
->>>>>>> friend/master
       error: (err) => console.error('Error loading students:', err)
     });
   }
@@ -200,61 +136,6 @@ export class TeacherDashboardComponent implements OnInit {
     }
   }
 
-<<<<<<< HEAD
-  // Assignments
-  getPendingSubmissions(): number {
-    return this.assignments.reduce((total, a) => total + (a.totalStudents - a.submissions), 0);
-  }
-
-  openAssignmentModal() {
-    this.showAssignmentModal = true;
-  }
-
-  closeAssignmentModal() {
-    this.showAssignmentModal = false;
-    this.newAssignment = { class: '', subject: '', title: '', dueDate: '' };
-  }
-
-  postAssignment() {
-    if (!this.newAssignment.class || !this.newAssignment.subject || !this.newAssignment.title || !this.newAssignment.dueDate) {
-      return;
-    }
-    this.assignments = [...this.assignments, {
-      id: this.assignments.length + 1,
-      class: this.newAssignment.class,
-      subject: this.newAssignment.subject,
-      title: this.newAssignment.title,
-      dueDate: this.newAssignment.dueDate,
-      submissions: 0,
-      totalStudents: 30
-    }];
-    this.closeAssignmentModal();
-  }
-
-  openGradeModal(assignment: Assignment) {
-    this.selectedAssignment = assignment;
-    this.gradeList = [
-      { student: 'Ahmed Ben Ali', submitted: true, grade: null },
-      { student: 'Sarra Mansour', submitted: true, grade: null },
-      { student: 'Yassine Trabelsi', submitted: false, grade: null },
-      { student: 'Meriem Khalil', submitted: true, grade: null },
-    ];
-    this.showGradeModal = true;
-  }
-
-  closeGradeModal() {
-    this.showGradeModal = false;
-    this.selectedAssignment = null;
-    this.gradeList = [];
-  }
-
-  saveGrades() {
-    console.log('Grades saved:', this.gradeList);
-    this.closeGradeModal();
-  }
-
-  // Chat
-=======
   // ─── VIRTUAL CLASSROOM ───
 
   loadAssignments() {
@@ -353,7 +234,6 @@ export class TeacherDashboardComponent implements OnInit {
 
   // ─── CHAT ───
 
->>>>>>> friend/master
   getChatMessages(): any[] {
     return this.currentMessages;
   }
@@ -378,13 +258,7 @@ export class TeacherDashboardComponent implements OnInit {
   loadConversation() {
     if (!this.selectedStudent) return;
     this.chatService.getConversation(this.currentUserId, this.selectedStudent).subscribe({
-<<<<<<< HEAD
-      next: (messages) => {
-        this.currentMessages = messages;
-      },
-=======
       next: (messages) => { this.currentMessages = messages; },
->>>>>>> friend/master
       error: (err) => console.error('Error loading conversation:', err)
     });
   }
@@ -392,11 +266,7 @@ export class TeacherDashboardComponent implements OnInit {
   logout() {
     this.authService.logout();
   }
-<<<<<<< HEAD
-}
-=======
   getTotalSubmissions(): number {
   return this.assignments.reduce((t, a) => t + (a.submissions?.length || 0), 0);
 }
 }
->>>>>>> friend/master

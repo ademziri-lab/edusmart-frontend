@@ -3,10 +3,6 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-logo">🎓 EduSmart</div>
-<<<<<<< HEAD
-
-=======
->>>>>>> friend/master
     <nav class="sidebar-nav">
       <div class="nav-item" [class.active]="activeSection === 'timetable'" (click)="setSection('timetable')">
         📅 My Timetable
@@ -21,10 +17,6 @@
         👤 My Profile
       </div>
     </nav>
-<<<<<<< HEAD
-
-=======
->>>>>>> friend/master
     <div class="sidebar-footer" (click)="logout()">
       🚪 Logout
     </div>
@@ -37,15 +29,9 @@
     <div class="top-navbar">
       <h1 class="page-title">{{ getSectionTitle() }}</h1>
       <div class="teacher-info">
-<<<<<<< HEAD
-  <span class="teacher-avatar">👨‍🏫</span>
-  <span class="teacher-name">{{ loggedInName }}</span>
-</div>
-=======
         <span class="teacher-avatar">👨‍🏫</span>
         <span class="teacher-name">{{ loggedInName }}</span>
       </div>
->>>>>>> friend/master
     </div>
 
     <!-- Content Area -->
@@ -88,16 +74,6 @@
             <span class="stat-label">Total Assignments</span>
           </div>
           <div class="stat-card">
-<<<<<<< HEAD
-            <span class="stat-number">{{ getPendingSubmissions() }}</span>
-            <span class="stat-label">Pending Grading</span>
-          </div>
-        </div>
-        <div class="section-card">
-          <div class="card-header">
-            <h3>Assignments & Exercises</h3>
-            <button class="btn-add" (click)="openAssignmentModal()">+ Post Assignment</button>
-=======
             <span class="stat-number">{{ getTotalSubmissions() }}</span>
             <span class="stat-label">Total Submissions</span>
           </div>
@@ -107,37 +83,20 @@
           <div class="card-header">
             <h3>My Assignments</h3>
             <button class="btn-add" (click)="openAddAssignmentModal()">+ New Assignment</button>
->>>>>>> friend/master
           </div>
           <table class="data-table">
             <thead>
               <tr>
-<<<<<<< HEAD
-                <th>Class</th>
-                <th>Subject</th>
-                <th>Title</th>
-                <th>Due Date</th>
-=======
                 <th>Title</th>
                 <th>Class</th>
                 <th>Subject</th>
                 <th>Due Date</th>
                 <th>File</th>
->>>>>>> friend/master
                 <th>Submissions</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-<<<<<<< HEAD
-              <tr *ngFor="let assignment of assignments">
-                <td>{{ assignment.class }}</td>
-                <td>{{ assignment.subject }}</td>
-                <td>{{ assignment.title }}</td>
-                <td>{{ assignment.dueDate }}</td>
-                <td>{{ assignment.submissions }}/{{ assignment.totalStudents }}</td>
-                <td><button class="btn-edit" (click)="openGradeModal(assignment)">Grade</button></td>
-=======
               <tr *ngFor="let a of assignments">
                 <td>{{ a.title }}</td>
                 <td>{{ a.className }}</td>
@@ -158,7 +117,6 @@
               </tr>
               <tr *ngIf="assignments.length === 0">
                 <td colspan="7" style="text-align:center; color: #a0b0c0;">No assignments posted yet.</td>
->>>>>>> friend/master
               </tr>
             </tbody>
           </table>
@@ -171,21 +129,6 @@
           <div class="card-header">
             <h3>Chat with Students</h3>
             <select class="teacher-select" [(ngModel)]="selectedStudent" (ngModelChange)="onStudentSelected()">
-<<<<<<< HEAD
-  <option value="" disabled>Select a student</option>
-  <option *ngFor="let student of students" [value]="student.email">
-    {{ student.firstName }} {{ student.lastName }}
-  </option>
-</select>
-          </div>
-          <div class="chat-messages">
-            <div *ngFor="let msg of getChatMessages()" class="message"
-  [class.sent]="msg.senderId === currentUserId"
-  [class.received]="msg.senderId !== currentUserId">
-  <div class="message-bubble">{{ msg.content }}</div>
-  <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
-</div>
-=======
               <option value="" disabled>Select a student</option>
               <option *ngFor="let student of students" [value]="student.email">
                 {{ student.firstName }} {{ student.lastName }}
@@ -199,7 +142,6 @@
               <div class="message-bubble">{{ msg.content }}</div>
               <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
             </div>
->>>>>>> friend/master
             <div *ngIf="getChatMessages().length === 0" class="no-messages">
               No messages yet. Start the conversation!
             </div>
@@ -213,75 +155,6 @@
       </div>
 
       <!-- Profile Section -->
-<<<<<<< HEAD
-<div *ngIf="activeSection === 'profile'">
-  <div class="section-card">
-    <h3>My Profile</h3>
-    <div class="profile-grid">
-      <div class="profile-item">
-        <span class="profile-label">First Name</span>
-        <span class="profile-value">{{ profile.firstName }}</span>
-      </div>
-      <div class="profile-item">
-        <span class="profile-label">Last Name</span>
-        <span class="profile-value">{{ profile.lastName }}</span>
-      </div>
-      <div class="profile-item">
-        <span class="profile-label">Email</span>
-        <span class="profile-value">{{ profile.email }}</span>
-      </div>
-      <div class="profile-item">
-        <span class="profile-label">Role</span>
-        <span class="profile-value">{{ profile.role }}</span>
-      </div>
-      <div class="profile-item">
-        <span class="profile-label">Department</span>
-        <span class="profile-value">{{ profile.department }}</span>
-      </div>
-      <div class="profile-item">
-        <span class="profile-label">Subjects</span>
-        <span class="profile-value">{{ profile.subjects }}</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-  <!-- Post Assignment Modal -->
-  <div class="modal-overlay" *ngIf="showAssignmentModal" (click)="closeAssignmentModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Post New Assignment</h3>
-        <span class="modal-close" (click)="closeAssignmentModal()">✕</span>
-      </div>
-      <div class="form-group">
-        <label>Class</label>
-        <select [(ngModel)]="newAssignment.class" name="assignmentClass">
-          <option value="" disabled selected>Select class</option>
-          <option>DSI1</option>
-          <option>DSI2</option>
-          <option>DSI3</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Subject</label>
-        <select [(ngModel)]="newAssignment.subject" name="assignmentSubject">
-          <option value="" disabled selected>Select subject</option>
-          <option>Algorithms</option>
-          <option>Data Structures</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Title</label>
-        <input type="text" placeholder="e.g. Exercise 1 — Sorting" [(ngModel)]="newAssignment.title" name="assignmentTitle" />
-      </div>
-      <div class="form-group">
-        <label>Due Date</label>
-        <input type="date" [(ngModel)]="newAssignment.dueDate" name="assignmentDueDate" />
-      </div>
-      <div class="modal-actions">
-        <button class="btn-cancel" (click)="closeAssignmentModal()">Cancel</button>
-        <button class="btn-add" (click)="postAssignment()">Post</button>
-=======
       <div *ngIf="activeSection === 'profile'">
         <div class="section-card">
           <h3>My Profile</h3>
@@ -358,45 +231,21 @@
       <div class="modal-actions">
         <button class="btn-cancel" (click)="closeAddAssignmentModal()">Cancel</button>
         <button class="btn-add" (click)="postAssignment()">Post Assignment</button>
->>>>>>> friend/master
       </div>
     </div>
   </div>
 
-<<<<<<< HEAD
-  <!-- Grade Modal -->
-  <div class="modal-overlay" *ngIf="showGradeModal" (click)="closeGradeModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Grade — {{ selectedAssignment?.title }}</h3>
-        <span class="modal-close" (click)="closeGradeModal()">✕</span>
-=======
   <!-- Submissions Modal -->
   <div class="modal-overlay" *ngIf="showSubmissionsModal" (click)="closeSubmissionsModal()">
     <div class="modal-card modal-large" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Submissions — {{ selectedAssignment?.title }}</h3>
         <span class="modal-close" (click)="closeSubmissionsModal()">✕</span>
->>>>>>> friend/master
       </div>
       <table class="data-table">
         <thead>
           <tr>
             <th>Student</th>
-<<<<<<< HEAD
-            <th>Status</th>
-            <th>Grade /20</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let submission of gradeList">
-            <td>{{ submission.student }}</td>
-            <td><span class="badge {{ submission.submitted ? 'approved' : 'pending' }}">{{ submission.submitted ? 'Submitted' : 'Not submitted' }}</span></td>
-            <td>
-              <input type="number" class="grade-input" min="0" max="20" step="0.5"
-                [(ngModel)]="submission.grade" [disabled]="!submission.submitted" placeholder="—" />
-            </td>
-=======
             <th>Submitted At</th>
             <th>File</th>
             <th>Status</th>
@@ -429,17 +278,11 @@
           </tr>
           <tr *ngIf="selectedAssignment?.submissions?.length === 0">
             <td colspan="6" style="text-align:center; color: #a0b0c0;">No submissions yet.</td>
->>>>>>> friend/master
           </tr>
         </tbody>
       </table>
       <div class="modal-actions">
-<<<<<<< HEAD
-        <button class="btn-cancel" (click)="closeGradeModal()">Close</button>
-        <button class="btn-add" (click)="saveGrades()">Save Grades</button>
-=======
         <button class="btn-cancel" (click)="closeSubmissionsModal()">Close</button>
->>>>>>> friend/master
       </div>
     </div>
   </div>

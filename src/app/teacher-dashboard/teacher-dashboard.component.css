@@ -548,8 +548,6 @@
 .btn-cancel:hover {
   border-color: white;
 }
-<<<<<<< HEAD
-=======
 /* ─── MODAL LARGE FIX ─── */
 .modal-large {
   width: 850px !important;
@@ -655,4 +653,3 @@
   outline: none;
   border-color: #00d4ff;
 }
->>>>>>> friend/master

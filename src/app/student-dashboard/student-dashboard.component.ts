@@ -3,16 +3,10 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
-<<<<<<< HEAD
-import { InternshipService } from '../services/internship.service';
-import { ChatService } from '../services/chat.service';
-import { UserService } from '../services/user.service';
-=======
 import { ChatService } from '../services/chat.service';
 import { UserService } from '../services/user.service';
 import { InternshipService } from '../services/internship.service';
 import { AssignmentService } from '../services/assignment.service';
->>>>>>> friend/master
 
 interface TimetableSlot {
   time: string;
@@ -23,27 +17,6 @@ interface TimetableSlot {
   friday: string;
 }
 
-<<<<<<< HEAD
-interface Assignment {
-  id: number;
-  subject: string;
-  title: string;
-  dueDate: string;
-  status: 'pending' | 'submitted';
-}
-
-interface InternshipRequest {
-  id: string;
-  studentId: string;
-  studentName: string;
-  company: string;
-  duration: string;
-  startDate: string;
-  status: string;
-}
-
-=======
->>>>>>> friend/master
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
@@ -57,44 +30,19 @@ export class StudentDashboardComponent implements OnInit {
   loggedInName: string = '';
   currentUserId: string = '';
   currentUserName: string = '';
-<<<<<<< HEAD
-=======
   studentClass: string = 'DSI1'; // will be updated from JWT if available
->>>>>>> friend/master
 
   profile = {
     firstName: '',
     lastName: '',
     email: '',
     role: '',
-<<<<<<< HEAD
-    class: '',
-    department: ''
-=======
     department: '',
     class: ''
->>>>>>> friend/master
   };
 
   // Timetable
   timetable: TimetableSlot[] = [
-<<<<<<< HEAD
-    { time: '08:00 - 10:00', monday: 'Algorithms', tuesday: 'Mathematics', wednesday: '—', thursday: 'English', friday: 'Algorithms' },
-    { time: '10:00 - 12:00', monday: 'Mathematics', tuesday: '—', wednesday: 'Algorithms', thursday: 'Mathematics', friday: '—' },
-    { time: '14:00 - 16:00', monday: '—', tuesday: 'English', wednesday: 'Mathematics', thursday: '—', friday: 'English' },
-    { time: '16:00 - 18:00', monday: 'English', tuesday: 'Algorithms', wednesday: '—', thursday: 'Algorithms', friday: 'Mathematics' },
-  ];
-
-  // Assignments
-  assignments: Assignment[] = [
-    { id: 1, subject: 'Algorithms', title: 'Exercise 1 — Sorting Algorithms', dueDate: '2024-10-15', status: 'pending' },
-    { id: 2, subject: 'Mathematics', title: 'Problem Set 3', dueDate: '2024-10-18', status: 'submitted' },
-    { id: 3, subject: 'English', title: 'Essay — Technology in Education', dueDate: '2024-10-20', status: 'pending' },
-  ];
-
-  // Internships
-  internshipRequests: InternshipRequest[] = [];
-=======
     { time: '08:00 - 10:00', monday: 'Algorithms', tuesday: '—', wednesday: 'Data Structures', thursday: '—', friday: 'Databases' },
     { time: '10:00 - 12:00', monday: '—', tuesday: 'Web Development', wednesday: '—', thursday: 'Algorithms', friday: '—' },
     { time: '14:00 - 16:00', monday: 'Databases', tuesday: '—', wednesday: 'Web Development', thursday: '—', friday: 'Data Structures' },
@@ -113,17 +61,12 @@ export class StudentDashboardComponent implements OnInit {
 
   // Internship
   internships: any[] = [];
->>>>>>> friend/master
   showInternshipModal: boolean = false;
   newInternship = {
     company: '',
     duration: '',
-<<<<<<< HEAD
-    startDate: ''
-=======
     startDate: '',
     description: ''
->>>>>>> friend/master
   };
 
   // Chat
@@ -134,26 +77,15 @@ export class StudentDashboardComponent implements OnInit {
 
   constructor(
     private router: Router,
-<<<<<<< HEAD
-    private internshipService: InternshipService,
-    private authService: AuthService,
-    private chatService: ChatService,
-    private userService: UserService
-=======
     private authService: AuthService,
     private chatService: ChatService,
     private userService: UserService,
     private internshipService: InternshipService,
     private assignmentService: AssignmentService
->>>>>>> friend/master
   ) {}
 
   ngOnInit() {
     this.loadCurrentUser();
-<<<<<<< HEAD
-    this.loadInternships();
-=======
->>>>>>> friend/master
     this.loadTeachers();
   }
 
@@ -169,16 +101,10 @@ export class StudentDashboardComponent implements OnInit {
         lastName: payload.lastName,
         email: payload.sub,
         role: payload.role,
-<<<<<<< HEAD
-        class: payload.class || 'Not assigned yet',
-        department: payload.department || 'Not assigned yet'
-      };
-=======
         department: payload.department || 'Not assigned yet',
         class: payload.className || 'DSI1'
       };
       this.studentClass = payload.className || 'DSI1';
->>>>>>> friend/master
       this.chatService.connect(this.currentUserId);
       this.chatService.getMessages().subscribe((message) => {
         const key = message.senderId === this.currentUserId ? message.receiverId : message.senderId;
@@ -186,44 +112,18 @@ export class StudentDashboardComponent implements OnInit {
           this.currentMessages = [...this.currentMessages, message];
         }
       });
-<<<<<<< HEAD
-=======
       this.loadAssignments();
       this.loadInternships();
->>>>>>> friend/master
     }
   }
 
   loadTeachers() {
     this.userService.getTeachers().subscribe({
-<<<<<<< HEAD
-      next: (data) => {
-        this.teachers = data;
-      },
-=======
       next: (data) => { this.teachers = data; },
->>>>>>> friend/master
       error: (err) => console.error('Error loading teachers:', err)
     });
   }
 
-<<<<<<< HEAD
-  loadInternships() {
-    const token = this.authService.getToken();
-    if (token) {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const studentEmail = payload.sub;
-      this.internshipService.getInternshipsByStudent(studentEmail).subscribe({
-        next: (data) => {
-          this.internshipRequests = data;
-        },
-        error: (err) => console.error('Error loading internships:', err)
-      });
-    }
-  }
-
-=======
->>>>>>> friend/master
   setSection(section: string) {
     this.activeSection = section;
     if (section === 'chat' && this.selectedTeacher) {
@@ -235,36 +135,13 @@ export class StudentDashboardComponent implements OnInit {
     switch (this.activeSection) {
       case 'timetable': return 'My Timetable';
       case 'classroom': return 'Virtual Classroom';
-<<<<<<< HEAD
-      case 'internship': return 'Internship Request';
-      case 'chat': return 'Text My Teacher';
-=======
       case 'internship': return 'Internship Requests';
       case 'chat': return 'Chat with Teachers';
->>>>>>> friend/master
       case 'profile': return 'My Profile';
       default: return 'Dashboard';
     }
   }
 
-<<<<<<< HEAD
-  // Assignments
-  submitAssignment(id: number) {
-    const assignment = this.assignments.find(a => a.id === id);
-    if (assignment) assignment.status = 'submitted';
-  }
-
-  getPendingAssignments(): number {
-    return this.assignments.filter(a => a.status === 'pending').length;
-  }
-
-  getSubmittedAssignments(): number {
-    return this.assignments.filter(a => a.status === 'submitted').length;
-  }
-
-  // Internships
-  openInternshipModal() {
-=======
   // ─── VIRTUAL CLASSROOM ───
 
   loadAssignments() {
@@ -348,31 +225,11 @@ export class StudentDashboardComponent implements OnInit {
 
   openInternshipModal() {
     this.newInternship = { company: '', duration: '', startDate: '', description: '' };
->>>>>>> friend/master
     this.showInternshipModal = true;
   }
 
   closeInternshipModal() {
     this.showInternshipModal = false;
-<<<<<<< HEAD
-    this.newInternship = { company: '', duration: '', startDate: '' };
-  }
-
-  submitInternshipRequest() {
-    if (!this.newInternship.company || !this.newInternship.duration || !this.newInternship.startDate) {
-      return;
-    }
-    const token = this.authService.getToken();
-    const payload = JSON.parse(atob(token!.split('.')[1]));
-    const internship = {
-      studentId: payload.sub,
-      studentName: payload.firstName + ' ' + payload.lastName,
-      company: this.newInternship.company,
-      duration: this.newInternship.duration,
-      startDate: this.newInternship.startDate
-    };
-    this.internshipService.submitInternship(internship).subscribe({
-=======
   }
 
   submitInternship() {
@@ -383,7 +240,6 @@ export class StudentDashboardComponent implements OnInit {
       studentName: this.currentUserName
     };
     this.internshipService.submitInternship(payload).subscribe({
->>>>>>> friend/master
       next: () => {
         this.loadInternships();
         this.closeInternshipModal();
@@ -392,37 +248,12 @@ export class StudentDashboardComponent implements OnInit {
     });
   }
 
-<<<<<<< HEAD
-  getApprovedInternships(): number {
-    return this.internshipRequests.filter(r => r.status === 'APPROVED').length;
-  }
-
-  // Chat
-=======
   // ─── CHAT ───
 
->>>>>>> friend/master
   getChatMessages(): any[] {
     return this.currentMessages;
   }
 
-<<<<<<< HEAD
-  onTeacherSelected() {
-    this.loadConversation();
-  }
-
-  loadConversation() {
-    if (!this.selectedTeacher) return;
-    this.chatService.getConversation(this.currentUserId, this.selectedTeacher).subscribe({
-      next: (messages) => {
-        this.currentMessages = messages;
-      },
-      error: (err) => console.error('Error loading conversation:', err)
-    });
-  }
-
-=======
->>>>>>> friend/master
   sendMessage() {
     if (!this.newMessage.trim() || !this.selectedTeacher) return;
     const message = {
@@ -436,12 +267,6 @@ export class StudentDashboardComponent implements OnInit {
     this.newMessage = '';
   }
 
-<<<<<<< HEAD
-  logout() {
-    this.authService.logout();
-  }
-}
-=======
   onTeacherSelected() {
     this.loadConversation();
   }
@@ -469,4 +294,3 @@ getApprovedInternships(): number {
   return this.internships.filter(i => i.status === 'APPROVED').length;
 }
 }
->>>>>>> friend/master
