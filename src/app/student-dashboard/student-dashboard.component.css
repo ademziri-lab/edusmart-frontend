@@ -530,3 +530,50 @@
 .btn-cancel:hover {
   border-color: white;
 }
+<<<<<<< HEAD
+=======
+.btn-download {
+  padding: 5px 12px;
+  background: rgba(0, 212, 255, 0.1);
+  color: #00d4ff;
+  border: 1px solid #00d4ff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: all 0.2s ease;
+}
+
+.btn-download:hover {
+  background: rgba(0, 212, 255, 0.25);
+}
+
+.btn-view {
+  padding: 5px 12px;
+  background: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+  border: 1px solid #3498db;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: all 0.2s ease;
+}
+
+.btn-view:hover {
+  background: rgba(52, 152, 219, 0.3);
+}
+
+.btn-delete {
+  padding: 5px 12px;
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+  background: rgba(231, 76, 60, 0.3);
+}
+>>>>>>> friend/master

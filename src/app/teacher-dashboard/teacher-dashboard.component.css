@@ -548,3 +548,111 @@
 .btn-cancel:hover {
   border-color: white;
 }
+<<<<<<< HEAD
+=======
+/* ─── MODAL LARGE FIX ─── */
+.modal-large {
+  width: 850px !important;
+  max-width: 95vw !important;
+}
+
+/* ─── SUBMISSIONS TABLE BUTTONS ─── */
+.btn-download {
+  padding: 5px 12px;
+  background: rgba(0, 212, 255, 0.1);
+  color: #00d4ff;
+  border: 1px solid #00d4ff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: all 0.2s ease;
+}
+
+.btn-download:hover {
+  background: rgba(0, 212, 255, 0.25);
+}
+
+.btn-save-grade {
+  padding: 5px 12px;
+  background: rgba(39, 174, 96, 0.15);
+  color: #27ae60;
+  border: 1px solid #27ae60;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: all 0.2s ease;
+}
+
+.btn-save-grade:hover {
+  background: rgba(39, 174, 96, 0.3);
+}
+
+.btn-delete {
+  padding: 5px 12px;
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+  background: rgba(231, 76, 60, 0.3);
+}
+
+.btn-edit {
+  padding: 5px 12px;
+  background: rgba(243, 156, 18, 0.15);
+  color: #f39c12;
+  border: 1px solid #f39c12;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: all 0.2s ease;
+  margin-right: 6px;
+}
+
+.btn-edit:hover {
+  background: rgba(243, 156, 18, 0.3);
+}
+
+.btn-view {
+  padding: 5px 12px;
+  background: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+  border: 1px solid #3498db;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: all 0.2s ease;
+}
+
+.btn-view:hover {
+  background: rgba(52, 152, 219, 0.3);
+}
+
+/* ─── GRADE INPUT ─── */
+.grade-input-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grade-input-cell input {
+  width: 65px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: #e0e0e0;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.grade-input-cell input:focus {
+  outline: none;
+  border-color: #00d4ff;
+}
+>>>>>>> friend/master

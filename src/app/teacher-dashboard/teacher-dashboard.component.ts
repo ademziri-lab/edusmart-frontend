@@ -5,6 +5,10 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { ChatService } from '../services/chat.service';
 import { UserService } from '../services/user.service';
+<<<<<<< HEAD
+=======
+import { AssignmentService } from '../services/assignment.service';
+>>>>>>> friend/master
 
 interface TimetableSlot {
   time: string;
@@ -15,6 +19,7 @@ interface TimetableSlot {
   friday: string;
 }
 
+<<<<<<< HEAD
 interface Assignment {
   id: number;
   class: string;
@@ -31,6 +36,8 @@ interface Submission {
   grade: number | null;
 }
 
+=======
+>>>>>>> friend/master
 @Component({
   selector: 'app-teacher-dashboard',
   standalone: true,
@@ -44,6 +51,10 @@ export class TeacherDashboardComponent implements OnInit {
   loggedInName: string = '';
   currentUserId: string = '';
   currentUserName: string = '';
+<<<<<<< HEAD
+=======
+  teacherId: string = '';
+>>>>>>> friend/master
 
   profile = {
     firstName: '',
@@ -62,6 +73,7 @@ export class TeacherDashboardComponent implements OnInit {
     { time: '16:00 - 18:00', monday: '—', tuesday: 'DSI1 — Algorithms', wednesday: 'DSI3 — Data Structures', thursday: '—', friday: 'DSI2 — Data Structures' },
   ];
 
+<<<<<<< HEAD
   // Assignments
   assignments: Assignment[] = [
     { id: 1, class: 'DSI1', subject: 'Algorithms', title: 'Exercise 1 — Sorting Algorithms', dueDate: '2024-10-15', submissions: 18, totalStudents: 30 },
@@ -82,6 +94,26 @@ export class TeacherDashboardComponent implements OnInit {
 
   gradeList: Submission[] = [];
 
+=======
+  // Virtual Classroom
+  assignments: any[] = [];
+  showAddAssignmentModal: boolean = false;
+  showSubmissionsModal: boolean = false;
+  selectedAssignment: any = null;
+  gradeInputs: { [studentId: string]: number } = {};
+
+  newAssignment = {
+    title: '',
+    subject: '',
+    className: '',
+    dueDate: '',
+    description: '',
+    fileName: '',
+    fileData: '',
+    fileType: ''
+  };
+
+>>>>>>> friend/master
   // Chat
   students: any[] = [];
   selectedStudent: string = '';
@@ -92,7 +124,12 @@ export class TeacherDashboardComponent implements OnInit {
     private router: Router,
     private chatService: ChatService,
     private authService: AuthService,
+<<<<<<< HEAD
     private userService: UserService
+=======
+    private userService: UserService,
+    private assignmentService: AssignmentService
+>>>>>>> friend/master
   ) {}
 
   ngOnInit() {
@@ -107,6 +144,10 @@ export class TeacherDashboardComponent implements OnInit {
       this.loggedInName = payload.firstName + ' ' + payload.lastName;
       this.currentUserId = payload.sub;
       this.currentUserName = payload.firstName + ' ' + payload.lastName;
+<<<<<<< HEAD
+=======
+      this.teacherId = payload.sub;
+>>>>>>> friend/master
       this.profile = {
         firstName: payload.firstName,
         lastName: payload.lastName,
@@ -122,14 +163,22 @@ export class TeacherDashboardComponent implements OnInit {
           this.currentMessages = [...this.currentMessages, message];
         }
       });
+<<<<<<< HEAD
+=======
+      this.loadAssignments();
+>>>>>>> friend/master
     }
   }
 
   loadStudents() {
     this.userService.getStudents().subscribe({
+<<<<<<< HEAD
       next: (data) => {
         this.students = data;
       },
+=======
+      next: (data) => { this.students = data; },
+>>>>>>> friend/master
       error: (err) => console.error('Error loading students:', err)
     });
   }
@@ -151,6 +200,7 @@ export class TeacherDashboardComponent implements OnInit {
     }
   }
 
+<<<<<<< HEAD
   // Assignments
   getPendingSubmissions(): number {
     return this.assignments.reduce((total, a) => total + (a.totalStudents - a.submissions), 0);
@@ -204,6 +254,106 @@ export class TeacherDashboardComponent implements OnInit {
   }
 
   // Chat
+=======
+  // ─── VIRTUAL CLASSROOM ───
+
+  loadAssignments() {
+    this.assignmentService.getAssignmentsByTeacher(this.teacherId).subscribe({
+      next: (data) => { this.assignments = data; },
+      error: (err) => console.error('Error loading assignments:', err)
+    });
+  }
+
+  openAddAssignmentModal() {
+    this.newAssignment = { title: '', subject: '', className: '', dueDate: '', description: '', fileName: '', fileData: '', fileType: '' };
+    this.showAddAssignmentModal = true;
+  }
+
+  closeAddAssignmentModal() {
+    this.showAddAssignmentModal = false;
+  }
+
+  onAssignmentFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = (reader.result as string).split(',')[1];
+      this.newAssignment.fileData = base64;
+      this.newAssignment.fileName = file.name;
+      this.newAssignment.fileType = file.name.endsWith('.pdf') ? 'pdf' : 'docx';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  postAssignment() {
+    if (!this.newAssignment.title || !this.newAssignment.className) return;
+    const payload = {
+      ...this.newAssignment,
+      teacherId: this.teacherId,
+      teacherName: this.loggedInName
+    };
+    this.assignmentService.createAssignment(payload).subscribe({
+      next: () => {
+        this.loadAssignments();
+        this.closeAddAssignmentModal();
+      },
+      error: (err) => console.error('Error posting assignment:', err)
+    });
+  }
+
+  deleteAssignment(id: string) {
+    if (!confirm('Delete this assignment?')) return;
+    this.assignmentService.deleteAssignment(id).subscribe({
+      next: () => { this.loadAssignments(); },
+      error: (err) => console.error('Error deleting assignment:', err)
+    });
+  }
+
+  viewSubmissions(assignment: any) {
+    this.selectedAssignment = assignment;
+    this.gradeInputs = {};
+    this.showSubmissionsModal = true;
+  }
+
+  closeSubmissionsModal() {
+    this.showSubmissionsModal = false;
+    this.selectedAssignment = null;
+    this.gradeInputs = {};
+  }
+
+  downloadFile(fileData: string, fileName: string, fileType: string) {
+    const byteArray = Uint8Array.from(atob(fileData), c => c.charCodeAt(0));
+    const blob = new Blob([byteArray], {
+      type: fileType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  gradeSubmission(assignmentId: string, studentId: string) {
+    const grade = this.gradeInputs[studentId];
+    if (grade === undefined || grade === null) return;
+    this.assignmentService.gradeSubmission(assignmentId, studentId, grade).subscribe({
+      next: () => {
+        this.loadAssignments();
+        this.closeSubmissionsModal();
+      },
+      error: (err) => console.error('Error grading submission:', err)
+    });
+  }
+
+  getSubmissionStatus(assignment: any): string {
+    return assignment.submissions?.length + ' / ' + '?' + ' submitted';
+  }
+
+  // ─── CHAT ───
+
+>>>>>>> friend/master
   getChatMessages(): any[] {
     return this.currentMessages;
   }
@@ -228,9 +378,13 @@ export class TeacherDashboardComponent implements OnInit {
   loadConversation() {
     if (!this.selectedStudent) return;
     this.chatService.getConversation(this.currentUserId, this.selectedStudent).subscribe({
+<<<<<<< HEAD
       next: (messages) => {
         this.currentMessages = messages;
       },
+=======
+      next: (messages) => { this.currentMessages = messages; },
+>>>>>>> friend/master
       error: (err) => console.error('Error loading conversation:', err)
     });
   }
@@ -238,4 +392,11 @@ export class TeacherDashboardComponent implements OnInit {
   logout() {
     this.authService.logout();
   }
+<<<<<<< HEAD
 }
+=======
+  getTotalSubmissions(): number {
+  return this.assignments.reduce((t, a) => t + (a.submissions?.length || 0), 0);
+}
+}
+>>>>>>> friend/master
