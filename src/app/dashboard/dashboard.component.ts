@@ -62,7 +62,7 @@ interface Internship {
 })
 export class DashboardComponent implements OnInit {
 
-  activeSection: string = 'applications';
+  activeSection: string = 'home';
   loggedInName: string = '';
 
   // Data
@@ -90,7 +90,29 @@ export class DashboardComponent implements OnInit {
   newClass = { name: '', department: '', level: '', studentCount: 0, subjects: '' };
   editClass = { name: '', department: '', level: '', studentCount: 0, subjects: '' };
 
+  selectedDepartmentFilter: string = '';
+  get filteredClasses(): any[] {
+  if (!this.selectedDepartmentFilter) return this.classes;
+  return this.classes.filter(c => c.department === this.selectedDepartmentFilter);
+}
+
+get availableDepartments(): string[] {
+  return [...new Set(this.classes.map(c => c.department))];
+}
+
   // Timetable
+  selectedTimetableDepartment: string = '';
+
+get timetableDepartments(): string[] {
+  return [...new Set(this.classes.map(c => c.department))];
+}
+
+get filteredTimetableClasses(): string[] {
+  if (!this.selectedTimetableDepartment) return this.classes.map(c => c.name);
+  return this.classes
+    .filter(c => c.department === this.selectedTimetableDepartment)
+    .map(c => c.name);
+}
   selectedTimetableClass: string = 'DSI1';
   timetables: { [key: string]: TimetableSlot[] } = {
     'DSI1': [
@@ -299,8 +321,8 @@ export class DashboardComponent implements OnInit {
 
   // Classes
   getTotalStudents(): number {
-    return this.classes.reduce((total, c) => total + c.studentCount, 0);
-  }
+  return this.applications.filter(a => a.status === 'APPROVED').length;
+}
 
   openAddClassModal() { this.showAddClassModal = true; }
 
@@ -416,9 +438,16 @@ export class DashboardComponent implements OnInit {
       case 'classes': return 'Classes Management';
       case 'timetable': return 'Timetable Generator';
       case 'internships': return 'Internship Management';
+      case 'home': return 'Dashboard Overview';
       default: return 'Dashboard';
     }
   }
+
+  
+
+
+
+  
 
   logout() { this.authService.logout(); }
 }

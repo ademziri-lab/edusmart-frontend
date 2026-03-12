@@ -7,6 +7,7 @@ import { ChatService } from '../services/chat.service';
 import { UserService } from '../services/user.service';
 import { InternshipService } from '../services/internship.service';
 import { AssignmentService } from '../services/assignment.service';
+import { CollegeClassService } from '../services/college-class.service';
 
 interface TimetableSlot {
   time: string;
@@ -42,12 +43,37 @@ export class StudentDashboardComponent implements OnInit {
   };
 
   // Timetable
-  timetable: TimetableSlot[] = [
+  timetables: { [key: string]: any[] } = {
+  'DSI1': [
     { time: '08:00 - 10:00', monday: 'Algorithms', tuesday: '—', wednesday: 'Data Structures', thursday: '—', friday: 'Databases' },
     { time: '10:00 - 12:00', monday: '—', tuesday: 'Web Development', wednesday: '—', thursday: 'Algorithms', friday: '—' },
     { time: '14:00 - 16:00', monday: 'Databases', tuesday: '—', wednesday: 'Web Development', thursday: '—', friday: 'Data Structures' },
     { time: '16:00 - 18:00', monday: '—', tuesday: 'Data Structures', wednesday: '—', thursday: 'Web Development', friday: '—' },
-  ];
+  ],
+  'DSI2': [
+    { time: '08:00 - 10:00', monday: 'Software Engineering', tuesday: '—', wednesday: 'Networks', thursday: '—', friday: 'Algorithms' },
+    { time: '10:00 - 12:00', monday: '—', tuesday: 'Algorithms', wednesday: '—', thursday: 'Software Engineering', friday: '—' },
+    { time: '14:00 - 16:00', monday: 'Networks', tuesday: '—', wednesday: 'Databases', thursday: '—', friday: 'Software Engineering' },
+    { time: '16:00 - 18:00', monday: '—', tuesday: 'Databases', wednesday: '—', thursday: 'Networks', friday: '—' },
+  ],
+  'DSI3': [
+    { time: '08:00 - 10:00', monday: 'AI', tuesday: '—', wednesday: 'Cloud Computing', thursday: '—', friday: 'Security' },
+    { time: '10:00 - 12:00', monday: '—', tuesday: 'Security', wednesday: '—', thursday: 'AI', friday: '—' },
+    { time: '14:00 - 16:00', monday: 'Cloud Computing', tuesday: '—', wednesday: 'AI', thursday: '—', friday: 'Cloud Computing' },
+    { time: '16:00 - 18:00', monday: '—', tuesday: 'Cloud Computing', wednesday: '—', thursday: 'Security', friday: '—' },
+  ],
+  'GL1': [
+    { time: '08:00 - 10:00', monday: 'UML', tuesday: '—', wednesday: 'Java EE', thursday: '—', friday: 'Design Patterns' },
+    { time: '10:00 - 12:00', monday: '—', tuesday: 'Design Patterns', wednesday: '—', thursday: 'UML', friday: '—' },
+    { time: '14:00 - 16:00', monday: 'Java EE', tuesday: '—', wednesday: 'UML', thursday: '—', friday: 'Java EE' },
+    { time: '16:00 - 18:00', monday: '—', tuesday: 'Java EE', wednesday: '—', thursday: 'Design Patterns', friday: '—' },
+  ]
+};
+
+getCurrentTimetable(): any[] {
+  if (!this.selectedTimetableClass) return [];
+  return this.timetables[this.selectedTimetableClass] || [];
+}
 
   // Virtual Classroom
   assignments: any[] = [];
@@ -75,14 +101,27 @@ export class StudentDashboardComponent implements OnInit {
   newMessage: string = '';
   currentMessages: any[] = [];
 
+  classes: any[] = [];
+selectedTimetableDepartment: string = '';
+selectedTimetableClass: string = '';
+
+get timetableDepartments(): string[] {
+  return [...new Set(this.classes.map((c: any) => c.department))];
+}
+
+get filteredTimetableClasses(): any[] {
+  if (!this.selectedTimetableDepartment) return this.classes;
+  return this.classes.filter((c: any) => c.department === this.selectedTimetableDepartment);
+}
   constructor(
-    private router: Router,
-    private authService: AuthService,
-    private chatService: ChatService,
-    private userService: UserService,
-    private internshipService: InternshipService,
-    private assignmentService: AssignmentService
-  ) {}
+  private router: Router,
+  private authService: AuthService,
+  private chatService: ChatService,
+  private userService: UserService,
+  private internshipService: InternshipService,
+  private assignmentService: AssignmentService,
+  private classService: CollegeClassService
+) {}
 
   ngOnInit() {
     this.loadCurrentUser();
@@ -113,9 +152,24 @@ export class StudentDashboardComponent implements OnInit {
         }
       });
       this.loadAssignments();
+      this.loadClasses();
       this.loadInternships();
     }
   }
+
+  loadClasses() {
+  this.classService.getAllClasses().subscribe({
+    next: (data: any[]) => {
+      this.classes = data;
+      const match = this.classes.find((c: any) => c.name === this.studentClass);
+      if (match) {
+        this.selectedTimetableDepartment = match.department;
+        this.selectedTimetableClass = match.name;
+      }
+    },
+    error: (err: any) => console.error('Error loading classes:', err)
+  });
+}
 
   loadTeachers() {
     this.userService.getTeachers().subscribe({

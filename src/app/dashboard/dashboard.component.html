@@ -4,7 +4,12 @@
     <aside class="sidebar">
         <div class="sidebar-logo">🎓 EduSmart</div>
         <nav class="sidebar-nav">
-            <div class="nav-item" [class.active]="activeSection === 'applications'" (click)="setSection('applications')">
+
+            <div class="nav-item" [class.active]="activeSection === 'home'" (click)="setSection('home')">
+                🏠 Home
+            </div>
+            <div class="nav-item" [class.active]="activeSection === 'applications'"
+                (click)="setSection('applications')">
                 📋 Applications
             </div>
             <div class="nav-item" [class.active]="activeSection === 'teachers'" (click)="setSection('teachers')">
@@ -39,6 +44,90 @@
 
         <!-- Content Area -->
         <div class="content-area">
+
+            <!-- Home Section -->
+            <div *ngIf="activeSection === 'home'">
+
+                <!-- Stat Cards Row -->
+                <div class="stats-row">
+                    <div class="stat-card home-stat">
+                        <span class="home-stat-icon">👨‍🎓</span>
+                        <span class="stat-number">{{ getTotalStudents() }}</span>
+                        <span class="stat-label">Total Students</span>
+                    </div>
+                    <div class="stat-card home-stat">
+                        <span class="home-stat-icon">👨‍🏫</span>
+                        <span class="stat-number">{{ getTotalTeachers() }}</span>
+                        <span class="stat-label">Total Teachers</span>
+                    </div>
+                    <div class="stat-card home-stat">
+                        <span class="home-stat-icon">🏫</span>
+                        <span class="stat-number">{{ classes.length }}</span>
+                        <span class="stat-label">Total Classes</span>
+                    </div>
+                    <div class="stat-card home-stat">
+                        <span class="home-stat-icon">📋</span>
+                        <span class="stat-number">{{ getPendingApplications() }}</span>
+                        <span class="stat-label">Pending Applications</span>
+                    </div>
+                </div>
+
+                <!-- Recent Applications -->
+                <div class="section-card">
+                    <div class="card-header">
+                        <h3>Recent Applications</h3>
+                        <button class="btn-add" (click)="setSection('applications')">View All</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let app of applications.slice(0, 5)">
+                                <td>{{ app.firstNameFr }} {{ app.lastNameFr }}</td>
+                                <td>{{ app.department }}</td>
+                                <td><span class="badge {{ app.status | lowercase }}">{{ app.status }}</span></td>
+                            </tr>
+                            <tr *ngIf="applications.length === 0">
+                                <td colspan="3" style="text-align:center; color: #a0b0c0;">No applications yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Recent Internships -->
+                <div class="section-card">
+                    <div class="card-header">
+                        <h3>Recent Internship Requests</h3>
+                        <button class="btn-add" (click)="setSection('internships')">View All</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Company</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let i of internships.slice(0, 5)">
+                                <td>{{ i.studentName }}</td>
+                                <td>{{ i.company }}</td>
+                                <td><span class="badge {{ i.status | lowercase }}">{{ i.status }}</span></td>
+                            </tr>
+                            <tr *ngIf="internships.length === 0">
+                                <td colspan="3" style="text-align:center; color: #a0b0c0;">No internship requests yet.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
 
             <!-- Applications Section -->
             <div *ngIf="activeSection === 'applications'">
@@ -80,8 +169,10 @@
                                         <span class="badge processing">⏳ Processing...</span>
                                     </ng-container>
                                     <ng-template #actionButtons>
-                                        <button class="btn-approve" *ngIf="app.status === 'PENDING'" (click)="approveApplication(app.id)">Approve</button>
-                                        <button class="btn-reject" *ngIf="app.status === 'PENDING'" (click)="rejectApplication(app.id)">Reject</button>
+                                        <button class="btn-approve" *ngIf="app.status === 'PENDING'"
+                                            (click)="approveApplication(app.id)">Approve</button>
+                                        <button class="btn-reject" *ngIf="app.status === 'PENDING'"
+                                            (click)="rejectApplication(app.id)">Reject</button>
                                         <button class="btn-delete" (click)="deleteApplication(app.id)">Delete</button>
                                     </ng-template>
                                 </td>
@@ -151,6 +242,13 @@
                         <h3>Classes List</h3>
                         <button class="btn-add" (click)="openAddClassModal()">+ Add Class</button>
                     </div>
+                    <!-- Department Filter -->
+                    <div class="filter-row">
+                        <select [(ngModel)]="selectedDepartmentFilter" name="deptFilter">
+                            <option value="">All Departments</option>
+                            <option *ngFor="let dept of availableDepartments" [value]="dept">{{ dept }}</option>
+                        </select>
+                    </div>
                     <table class="data-table">
                         <thead>
                             <tr>
@@ -163,7 +261,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let c of classes">
+                            <tr *ngFor="let c of filteredClasses">
                                 <td>{{ c.name }}</td>
                                 <td>{{ c.department }}</td>
                                 <td>{{ c.level }}</td>
@@ -187,9 +285,18 @@
                         <button class="btn-add">Generate Timetable</button>
                     </div>
                     <p class="placeholder-text">Select a class to view its generated timetable.</p>
+                    <!-- Department Filter -->
+                    <div class="filter-row">
+                        <select [(ngModel)]="selectedTimetableDepartment" name="timetableDeptFilter"
+                            (ngModelChange)="selectedTimetableClass = ''">
+                            <option value="">All Departments</option>
+                            <option *ngFor="let dept of timetableDepartments" [value]="dept">{{ dept }}</option>
+                        </select>
+                    </div>
+
+                    <!-- Class Selector -->
                     <div class="class-selector">
-                        <button *ngFor="let t of ['DSI1','DSI2','DSI3','GL1']"
-                            [class.active]="selectedTimetableClass === t"
+                        <button *ngFor="let t of filteredTimetableClasses" [class.active]="selectedTimetableClass === t"
                             (click)="selectClass(t)">
                             {{ t }}
                         </button>
@@ -248,10 +355,13 @@
                                 <td>{{ internship.studentName }}</td>
                                 <td>{{ internship.company }}</td>
                                 <td>{{ internship.duration }}</td>
-                                <td><span class="badge {{ internship.status | lowercase }}">{{ internship.status }}</span></td>
+                                <td><span class="badge {{ internship.status | lowercase }}">{{ internship.status
+                                        }}</span></td>
                                 <td>
-                                    <button class="btn-approve" *ngIf="internship.status === 'PENDING'" (click)="approveInternship(internship.id)">Approve</button>
-                                    <button class="btn-reject" *ngIf="internship.status === 'PENDING'" (click)="rejectInternship(internship.id)">Reject</button>
+                                    <button class="btn-approve" *ngIf="internship.status === 'PENDING'"
+                                        (click)="approveInternship(internship.id)">Approve</button>
+                                    <button class="btn-reject" *ngIf="internship.status === 'PENDING'"
+                                        (click)="rejectInternship(internship.id)">Reject</button>
                                     <button class="btn-delete" (click)="deleteInternship(internship.id)">Delete</button>
                                 </td>
                             </tr>
@@ -272,11 +382,13 @@
             </div>
             <div class="form-group">
                 <label>Full Name</label>
-                <input type="text" placeholder="e.g. Dr. Karim Bouaziz" [(ngModel)]="newTeacher.fullName" name="teacherName" />
+                <input type="text" placeholder="e.g. Dr. Karim Bouaziz" [(ngModel)]="newTeacher.fullName"
+                    name="teacherName" />
             </div>
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" placeholder="e.g. k.bouaziz@edusmart.com" [(ngModel)]="newTeacher.email" name="teacherEmail" />
+                <input type="email" placeholder="e.g. k.bouaziz@edusmart.com" [(ngModel)]="newTeacher.email"
+                    name="teacherEmail" />
             </div>
             <div class="form-group">
                 <label>Department</label>
@@ -291,7 +403,8 @@
             </div>
             <div class="form-group">
                 <label>Subjects (comma separated)</label>
-                <input type="text" placeholder="e.g. Algorithms, Data Structures" [(ngModel)]="newTeacher.subjects" name="teacherSubjects" />
+                <input type="text" placeholder="e.g. Algorithms, Data Structures" [(ngModel)]="newTeacher.subjects"
+                    name="teacherSubjects" />
             </div>
             <div class="modal-actions">
                 <button class="btn-cancel" (click)="closeAddTeacherModal()">Cancel</button>
@@ -378,7 +491,8 @@
             </div>
             <div class="form-group">
                 <label>Subjects (comma separated)</label>
-                <input type="text" placeholder="e.g. Algorithms, Databases" [(ngModel)]="newClass.subjects" name="classSubjects" />
+                <input type="text" placeholder="e.g. Algorithms, Databases" [(ngModel)]="newClass.subjects"
+                    name="classSubjects" />
             </div>
             <div class="modal-actions">
                 <button class="btn-cancel" (click)="closeAddClassModal()">Cancel</button>

@@ -41,35 +41,61 @@
     <div class="content-area">
 
       <!-- Timetable Section -->
-      <div *ngIf="activeSection === 'timetable'">
-        <div class="section-card">
-          <div class="card-header">
-            <h3>My Class Timetable — DSI1</h3>
-          </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Monday</th>
-                <th>Tuesday</th>
-                <th>Wednesday</th>
-                <th>Thursday</th>
-                <th>Friday</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let slot of timetable">
-                <td class="time-slot">{{ slot.time }}</td>
-                <td [class.subject-cell]="slot.monday !== '—'">{{ slot.monday }}</td>
-                <td [class.subject-cell]="slot.tuesday !== '—'">{{ slot.tuesday }}</td>
-                <td [class.subject-cell]="slot.wednesday !== '—'">{{ slot.wednesday }}</td>
-                <td [class.subject-cell]="slot.thursday !== '—'">{{ slot.thursday }}</td>
-                <td [class.subject-cell]="slot.friday !== '—'">{{ slot.friday }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<div *ngIf="activeSection === 'timetable'">
+  <div class="section-card">
+    <div class="card-header">
+      <h3>My Class Timetable</h3>
+    </div>
+
+    <!-- Department Filter -->
+    <div class="filter-row">
+      <select [(ngModel)]="selectedTimetableDepartment" name="timetableDeptFilter"
+        (ngModelChange)="selectedTimetableClass = ''">
+        <option value="">All Departments</option>
+        <option *ngFor="let dept of timetableDepartments" [value]="dept">{{ dept }}</option>
+      </select>
+    </div>
+
+    <!-- Class Selector -->
+    <div class="class-selector">
+      <button *ngFor="let c of filteredTimetableClasses"
+        [class.active]="selectedTimetableClass === c.name"
+        (click)="selectedTimetableClass = c.name">
+        {{ c.name }}
+      </button>
+    </div>
+
+    <div *ngIf="selectedTimetableClass">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let slot of getCurrentTimetable()">
+            <td class="time-slot">{{ slot.time }}</td>
+            <td [class.subject-cell]="slot.monday !== '—'">{{ slot.monday }}</td>
+            <td [class.subject-cell]="slot.tuesday !== '—'">{{ slot.tuesday }}</td>
+            <td [class.subject-cell]="slot.wednesday !== '—'">{{ slot.wednesday }}</td>
+            <td [class.subject-cell]="slot.thursday !== '—'">{{ slot.thursday }}</td>
+            <td [class.subject-cell]="slot.friday !== '—'">{{ slot.friday }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="!selectedTimetableClass" style="text-align:center; color: #a0b0c0; padding: 40px 0;">
+      Select a department and class to view the timetable.
+    </div>
+
+  </div>
+</div>
 
       <!-- Virtual Classroom Section -->
       <div *ngIf="activeSection === 'classroom'">
