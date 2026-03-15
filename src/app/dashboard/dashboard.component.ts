@@ -7,6 +7,7 @@ import { AuthService } from '../services/auth.service';
 import { TeacherService } from '../services/teacher.service';
 import { CollegeClassService } from '../services/college-class.service';
 import { InternshipService } from '../services/internship.service';
+import { UserService } from '../services/user.service';
 
 interface Application {
   id: string;
@@ -90,6 +91,14 @@ export class DashboardComponent implements OnInit {
   newClass = { name: '', department: '', level: '', studentCount: 0, subjects: '' };
   editClass = { name: '', department: '', level: '', studentCount: 0, subjects: '' };
 
+  // Assign class modals
+showAssignStudentClassModal: boolean = false;
+showAssignTeacherClassesModal: boolean = false;
+selectedUserForAssign: any = null;
+selectedClassForAssign: string = '';
+selectedClassesForTeacher: string[] = [];
+students: any[] = [];
+
   selectedDepartmentFilter: string = '';
   get filteredClasses(): any[] {
   if (!this.selectedDepartmentFilter) return this.classes;
@@ -147,7 +156,8 @@ get filteredTimetableClasses(): string[] {
     private authService: AuthService,
     private teacherService: TeacherService,
     private collegeClassService: CollegeClassService,
-    private internshipService: InternshipService
+    private internshipService: InternshipService,
+    private userService: UserService
   ) {}
 
   ngOnInit() {
@@ -156,6 +166,7 @@ get filteredTimetableClasses(): string[] {
     this.loadTeachers();
     this.loadClasses();
     this.loadInternships();
+    this.loadStudents();
   }
 
   loadCurrentUser() {
@@ -193,6 +204,80 @@ get filteredTimetableClasses(): string[] {
       error: (err) => console.error('Error loading internships:', err)
     });
   }
+
+  loadStudents() {
+  this.userService.getStudents().subscribe({
+    next: (data) => { this.students = data; },
+    error: (err) => console.error('Error loading students:', err)
+  });
+}
+
+// Open assign class modal for student
+openAssignStudentClassModal(student: any) {
+  this.selectedUserForAssign = student;
+  this.selectedClassForAssign = student.className || '';
+  this.showAssignStudentClassModal = true;
+}
+
+closeAssignStudentClassModal() {
+  this.showAssignStudentClassModal = false;
+  this.selectedUserForAssign = null;
+  this.selectedClassForAssign = '';
+}
+
+assignClassToStudent() {
+  if (!this.selectedClassForAssign) return;
+  this.userService.assignClassToStudent(
+    this.selectedUserForAssign.id,
+    this.selectedClassForAssign
+  ).subscribe({
+    next: () => {
+      this.loadStudents();
+      this.closeAssignStudentClassModal();
+    },
+    error: (err) => console.error('Error assigning class:', err)
+  });
+}
+
+// Open assign classes modal for teacher
+openAssignTeacherClassesModal(teacher: any) {
+  this.selectedUserForAssign = teacher;
+  this.selectedClassesForTeacher = teacher.assignedClasses || [];
+  this.showAssignTeacherClassesModal = true;
+}
+
+closeAssignTeacherClassesModal() {
+  this.showAssignTeacherClassesModal = false;
+  this.selectedUserForAssign = null;
+  this.selectedClassesForTeacher = [];
+}
+
+toggleClassForTeacher(className: string) {
+  const index = this.selectedClassesForTeacher.indexOf(className);
+  if (index === -1) {
+    this.selectedClassesForTeacher.push(className);
+  } else {
+    this.selectedClassesForTeacher.splice(index, 1);
+  }
+}
+
+isClassSelectedForTeacher(className: string): boolean {
+  return this.selectedClassesForTeacher.includes(className);
+}
+
+assignClassesToTeacher() {
+  if (this.selectedClassesForTeacher.length === 0) return;
+  this.userService.assignClassesToTeacher(
+    this.selectedUserForAssign.id,
+    this.selectedClassesForTeacher
+  ).subscribe({
+    next: () => {
+      this.loadTeachers();
+      this.closeAssignTeacherClassesModal();
+    },
+    error: (err) => console.error('Error assigning classes:', err)
+  });
+}
 
   // Applications
   viewApplication(app: any) {
@@ -439,11 +524,18 @@ get filteredTimetableClasses(): string[] {
       case 'timetable': return 'Timetable Generator';
       case 'internships': return 'Internship Management';
       case 'home': return 'Dashboard Overview';
+      case 'students': return 'Students';
       default: return 'Dashboard';
     }
   }
 
-  
+  getAssignedStudentsCount(): number {
+  return this.students.filter(s => s.className).length;
+}
+
+getUnassignedStudentsCount(): number {
+  return this.students.filter(s => !s.className).length;
+}
 
 
 

@@ -31,6 +31,7 @@ export class TeacherDashboardComponent implements OnInit {
   currentUserId: string = '';
   currentUserName: string = '';
   teacherId: string = '';
+  assignedClasses: string[] = [];
 
   profile = {
     firstName: '',
@@ -42,47 +43,55 @@ export class TeacherDashboardComponent implements OnInit {
   };
 
   // Timetable
- classes: any[] = [];
-selectedTimetableDepartment: string = '';
-selectedTimetableClass: string = '';
+  classes: any[] = [];
+  selectedTimetableDepartment: string = '';
+  selectedTimetableClass: string = '';
 
-timetables: { [key: string]: any[] } = {
-  'DSI1': [
-    { time: '08:00 - 10:00', monday: 'DSI1 — Algorithms', tuesday: '—', wednesday: 'DSI1 — Data Structures', thursday: '—', friday: 'DSI1 — Databases' },
-    { time: '10:00 - 12:00', monday: '—', tuesday: 'DSI1 — Web Development', wednesday: '—', thursday: 'DSI1 — Algorithms', friday: '—' },
-    { time: '14:00 - 16:00', monday: 'DSI1 — Databases', tuesday: '—', wednesday: 'DSI1 — Web Development', thursday: '—', friday: 'DSI1 — Data Structures' },
-    { time: '16:00 - 18:00', monday: '—', tuesday: 'DSI1 — Data Structures', wednesday: '—', thursday: 'DSI1 — Web Development', friday: '—' },
-  ],
-  'DSI2': [
-    { time: '08:00 - 10:00', monday: 'DSI2 — Software Engineering', tuesday: '—', wednesday: 'DSI2 — Networks', thursday: '—', friday: 'DSI2 — Algorithms' },
-    { time: '10:00 - 12:00', monday: '—', tuesday: 'DSI2 — Algorithms', wednesday: '—', thursday: 'DSI2 — Software Engineering', friday: '—' },
-    { time: '14:00 - 16:00', monday: 'DSI2 — Networks', tuesday: '—', wednesday: 'DSI2 — Databases', thursday: '—', friday: 'DSI2 — Software Engineering' },
-    { time: '16:00 - 18:00', monday: '—', tuesday: 'DSI2 — Databases', wednesday: '—', thursday: 'DSI2 — Networks', friday: '—' },
-  ],
-  'DSI3': [
-    { time: '08:00 - 10:00', monday: 'DSI3 — AI', tuesday: '—', wednesday: 'DSI3 — Cloud Computing', thursday: '—', friday: 'DSI3 — Security' },
-    { time: '10:00 - 12:00', monday: '—', tuesday: 'DSI3 — Security', wednesday: '—', thursday: 'DSI3 — AI', friday: '—' },
-    { time: '14:00 - 16:00', monday: 'DSI3 — Cloud Computing', tuesday: '—', wednesday: 'DSI3 — AI', thursday: '—', friday: 'DSI3 — Cloud Computing' },
-    { time: '16:00 - 18:00', monday: '—', tuesday: 'DSI3 — Cloud Computing', wednesday: '—', thursday: 'DSI3 — Security', friday: '—' },
-  ],
-  'GL1': [
-    { time: '08:00 - 10:00', monday: 'GL1 — UML', tuesday: '—', wednesday: 'GL1 — Java EE', thursday: '—', friday: 'GL1 — Design Patterns' },
-    { time: '10:00 - 12:00', monday: '—', tuesday: 'GL1 — Design Patterns', wednesday: '—', thursday: 'GL1 — UML', friday: '—' },
-    { time: '14:00 - 16:00', monday: 'GL1 — Java EE', tuesday: '—', wednesday: 'GL1 — UML', thursday: '—', friday: 'GL1 — Java EE' },
-    { time: '16:00 - 18:00', monday: '—', tuesday: 'GL1 — Java EE', wednesday: '—', thursday: 'GL1 — Design Patterns', friday: '—' },
-  ]
-};
+  timetables: { [key: string]: any[] } = {
+    'DSI1': [
+      { time: '08:00 - 10:00', monday: 'DSI1 — Algorithms', tuesday: '—', wednesday: 'DSI1 — Data Structures', thursday: '—', friday: 'DSI1 — Databases' },
+      { time: '10:00 - 12:00', monday: '—', tuesday: 'DSI1 — Web Development', wednesday: '—', thursday: 'DSI1 — Algorithms', friday: '—' },
+      { time: '14:00 - 16:00', monday: 'DSI1 — Databases', tuesday: '—', wednesday: 'DSI1 — Web Development', thursday: '—', friday: 'DSI1 — Data Structures' },
+      { time: '16:00 - 18:00', monday: '—', tuesday: 'DSI1 — Data Structures', wednesday: '—', thursday: 'DSI1 — Web Development', friday: '—' },
+    ],
+    'DSI2': [
+      { time: '08:00 - 10:00', monday: 'DSI2 — Software Engineering', tuesday: '—', wednesday: 'DSI2 — Networks', thursday: '—', friday: 'DSI2 — Algorithms' },
+      { time: '10:00 - 12:00', monday: '—', tuesday: 'DSI2 — Algorithms', wednesday: '—', thursday: 'DSI2 — Software Engineering', friday: '—' },
+      { time: '14:00 - 16:00', monday: 'DSI2 — Networks', tuesday: '—', wednesday: 'DSI2 — Databases', thursday: '—', friday: 'DSI2 — Software Engineering' },
+      { time: '16:00 - 18:00', monday: '—', tuesday: 'DSI2 — Databases', wednesday: '—', thursday: 'DSI2 — Networks', friday: '—' },
+    ],
+    'DSI3': [
+      { time: '08:00 - 10:00', monday: 'DSI3 — AI', tuesday: '—', wednesday: 'DSI3 — Cloud Computing', thursday: '—', friday: 'DSI3 — Security' },
+      { time: '10:00 - 12:00', monday: '—', tuesday: 'DSI3 — Security', wednesday: '—', thursday: 'DSI3 — AI', friday: '—' },
+      { time: '14:00 - 16:00', monday: 'DSI3 — Cloud Computing', tuesday: '—', wednesday: 'DSI3 — AI', thursday: '—', friday: 'DSI3 — Cloud Computing' },
+      { time: '16:00 - 18:00', monday: '—', tuesday: 'DSI3 — Cloud Computing', wednesday: '—', thursday: 'DSI3 — Security', friday: '—' },
+    ],
+    'GL1': [
+      { time: '08:00 - 10:00', monday: 'GL1 — UML', tuesday: '—', wednesday: 'GL1 — Java EE', thursday: '—', friday: 'GL1 — Design Patterns' },
+      { time: '10:00 - 12:00', monday: '—', tuesday: 'GL1 — Design Patterns', wednesday: '—', thursday: 'GL1 — UML', friday: '—' },
+      { time: '14:00 - 16:00', monday: 'GL1 — Java EE', tuesday: '—', wednesday: 'GL1 — UML', thursday: '—', friday: 'GL1 — Java EE' },
+      { time: '16:00 - 18:00', monday: '—', tuesday: 'GL1 — Java EE', wednesday: '—', thursday: 'GL1 — Design Patterns', friday: '—' },
+    ]
+  };
 
-get timetableDepartments(): string[] {
-  return [...new Set(this.classes.map((c: any) => c.department))];
-}
+  get timetableDepartments(): string[] {
+    return [...new Set(this.classes.map((c: any) => c.department))];
+  }
 
-get filteredTimetableClasses(): any[] {
-  if (!this.selectedTimetableDepartment) return this.classes;
-  return this.classes.filter((c: any) => c.department === this.selectedTimetableDepartment);
-}
+  get filteredTimetableClasses(): any[] {
+    const base = this.selectedTimetableDepartment
+      ? this.classes.filter((c: any) => c.department === this.selectedTimetableDepartment)
+      : this.classes;
+    if (this.assignedClasses.length > 0) {
+      return base.filter((c: any) => this.assignedClasses.includes(c.name));
+    }
+    return base;
+  }
 
-
+  getCurrentTimetable(): any[] {
+    if (!this.selectedTimetableClass) return [];
+    return this.timetables[this.selectedTimetableClass] || [];
+  }
 
   // Virtual Classroom
   assignments: any[] = [];
@@ -109,19 +118,19 @@ get filteredTimetableClasses(): any[] {
   currentMessages: any[] = [];
 
   constructor(
-  private router: Router,
-  private chatService: ChatService,
-  private authService: AuthService,
-  private userService: UserService,
-  private assignmentService: AssignmentService,
-  private classService: CollegeClassService
-) {}
+    private router: Router,
+    private chatService: ChatService,
+    private authService: AuthService,
+    private userService: UserService,
+    private assignmentService: AssignmentService,
+    private classService: CollegeClassService
+  ) {}
 
   ngOnInit() {
-  this.loadCurrentUser();
-  this.loadStudents();
-  this.loadClasses();
-}
+    this.loadCurrentUser();
+    this.loadStudents();
+    this.loadClasses();
+  }
 
   loadCurrentUser() {
     const token = this.authService.getToken();
@@ -131,6 +140,7 @@ get filteredTimetableClasses(): any[] {
       this.currentUserId = payload.sub;
       this.currentUserName = payload.firstName + ' ' + payload.lastName;
       this.teacherId = payload.sub;
+      this.assignedClasses = payload.assignedClasses || [];
       this.profile = {
         firstName: payload.firstName,
         lastName: payload.lastName,
@@ -154,6 +164,13 @@ get filteredTimetableClasses(): any[] {
     this.userService.getStudents().subscribe({
       next: (data) => { this.students = data; },
       error: (err) => console.error('Error loading students:', err)
+    });
+  }
+
+  loadClasses() {
+    this.classService.getAllClasses().subscribe({
+      next: (data: any[]) => { this.classes = data; },
+      error: (err: any) => console.error('Error loading classes:', err)
     });
   }
 
@@ -266,8 +283,12 @@ get filteredTimetableClasses(): any[] {
     });
   }
 
+  getTotalSubmissions(): number {
+    return this.assignments.reduce((t, a) => t + (a.submissions?.length || 0), 0);
+  }
+
   getSubmissionStatus(assignment: any): string {
-    return assignment.submissions?.length + ' / ' + '?' + ' submitted';
+    return assignment.submissions?.length + ' / ? submitted';
   }
 
   // ─── CHAT ───
@@ -304,21 +325,4 @@ get filteredTimetableClasses(): any[] {
   logout() {
     this.authService.logout();
   }
-  getTotalSubmissions(): number {
-  return this.assignments.reduce((t, a) => t + (a.submissions?.length || 0), 0);
-
-  
-}
-
-getCurrentTimetable(): any[] {
-  if (!this.selectedTimetableClass) return [];
-  return this.timetables[this.selectedTimetableClass] || [];
-}
-
-loadClasses() {
-  this.classService.getAllClasses().subscribe({
-    next: (data: any[]) => { this.classes = data; },
-    error: (err: any) => console.error('Error loading classes:', err)
-  });
-}
 }

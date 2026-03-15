@@ -37,61 +37,61 @@
     <!-- Content Area -->
     <div class="content-area">
 
-     <!-- Timetable Section -->
-<div *ngIf="activeSection === 'timetable'">
-  <div class="section-card">
-    <h3>My Teaching Schedule</h3>
+      <!-- Timetable Section -->
+      <div *ngIf="activeSection === 'timetable'">
+        <div class="section-card">
+          <h3>My Teaching Schedule</h3>
 
-    <!-- Department Filter -->
-    <div class="filter-row">
-      <select [(ngModel)]="selectedTimetableDepartment" name="timetableDeptFilter"
-        (ngModelChange)="selectedTimetableClass = ''">
-        <option value="">All Departments</option>
-        <option *ngFor="let dept of timetableDepartments" [value]="dept">{{ dept }}</option>
-      </select>
-    </div>
+          <!-- Department Filter -->
+          <div class="filter-row">
+            <select [(ngModel)]="selectedTimetableDepartment" name="timetableDeptFilter"
+              (ngModelChange)="selectedTimetableClass = ''">
+              <option value="">All Departments</option>
+              <option *ngFor="let dept of timetableDepartments" [value]="dept">{{ dept }}</option>
+            </select>
+          </div>
 
-    <!-- Class Selector -->
-    <div class="class-selector">
-      <button *ngFor="let c of filteredTimetableClasses"
-        [class.active]="selectedTimetableClass === c.name"
-        (click)="selectedTimetableClass = c.name">
-        {{ c.name }}
-      </button>
-    </div>
+          <!-- Class Selector -->
+          <div class="class-selector">
+            <button *ngFor="let c of filteredTimetableClasses"
+              [class.active]="selectedTimetableClass === c.name"
+              (click)="selectedTimetableClass = c.name">
+              {{ c.name }}
+            </button>
+          </div>
 
-    <div *ngIf="selectedTimetableClass">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Monday</th>
-            <th>Tuesday</th>
-            <th>Wednesday</th>
-            <th>Thursday</th>
-            <th>Friday</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let slot of getCurrentTimetable()">
-            <td class="time-slot">{{ slot.time }}</td>
-            <td [class.subject-cell]="slot.monday !== '—'">{{ slot.monday }}</td>
-            <td [class.subject-cell]="slot.tuesday !== '—'">{{ slot.tuesday }}</td>
-            <td [class.subject-cell]="slot.wednesday !== '—'">{{ slot.wednesday }}</td>
-            <td [class.subject-cell]="slot.thursday !== '—'">{{ slot.thursday }}</td>
-            <td [class.subject-cell]="slot.friday !== '—'">{{ slot.friday }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+          <div *ngIf="selectedTimetableClass">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Monday</th>
+                  <th>Tuesday</th>
+                  <th>Wednesday</th>
+                  <th>Thursday</th>
+                  <th>Friday</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let slot of getCurrentTimetable()">
+                  <td class="time-slot">{{ slot.time }}</td>
+                  <td [class.subject-cell]="slot.monday !== '—'">{{ slot.monday }}</td>
+                  <td [class.subject-cell]="slot.tuesday !== '—'">{{ slot.tuesday }}</td>
+                  <td [class.subject-cell]="slot.wednesday !== '—'">{{ slot.wednesday }}</td>
+                  <td [class.subject-cell]="slot.thursday !== '—'">{{ slot.thursday }}</td>
+                  <td [class.subject-cell]="slot.friday !== '—'">{{ slot.friday }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-    <div *ngIf="!selectedTimetableClass"
-      style="text-align:center; color: #a0b0c0; padding: 40px 0;">
-      Select a department and class to view the timetable.
-    </div>
+          <div *ngIf="!selectedTimetableClass"
+            style="text-align:center; color: #a0b0c0; padding: 40px 0;">
+            Select a department and class to view the timetable.
+          </div>
 
-  </div>
-</div>
+        </div>
+      </div>
 
       <!-- Virtual Classroom Section -->
       <div *ngIf="activeSection === 'classroom'">
@@ -130,7 +130,7 @@
                 <td>{{ a.subject }}</td>
                 <td>{{ a.dueDate }}</td>
                 <td>
-                  <button *ngIf="a.fileData" class="btn-view"
+                  <button *ngIf="a.fileData" class="btn-download"
                     (click)="downloadFile(a.fileData, a.fileName, a.fileType)">
                     📄 Download
                   </button>
@@ -210,6 +210,12 @@
               <span class="profile-label">Subjects</span>
               <span class="profile-value">{{ profile.subjects }}</span>
             </div>
+            <div class="profile-item">
+              <span class="profile-label">Assigned Classes</span>
+              <span class="profile-value">
+                {{ assignedClasses.length > 0 ? assignedClasses.join(', ') : 'Not assigned yet' }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -236,8 +242,10 @@
       </div>
       <div class="form-group">
         <label>Class</label>
-        <input type="text" placeholder="e.g. DSI1"
-          [(ngModel)]="newAssignment.className" name="aClass" />
+        <select [(ngModel)]="newAssignment.className" name="aClass">
+          <option value="" disabled>Select a class</option>
+          <option *ngFor="let c of assignedClasses" [value]="c">{{ c }}</option>
+        </select>
       </div>
       <div class="form-group">
         <label>Due Date</label>
@@ -285,23 +293,22 @@
             <td>{{ s.studentName }}</td>
             <td>{{ s.submittedAt }}</td>
             <td>
-              <td>
-  <button class="btn-download" (click)="downloadFile(s.fileData, s.fileName, s.fileType)">
-    📄 Download
-  </button>
-</td>
+              <button class="btn-download" (click)="downloadFile(s.fileData, s.fileName, s.fileType)">
+                📄 Download
+              </button>
+            </td>
             <td><span class="badge {{ s.status | lowercase }}">{{ s.status }}</span></td>
             <td>
-  <div class="grade-input-cell">
-    <input type="number" min="0" max="20" placeholder="0-20"
-      [(ngModel)]="gradeInputs[s.studentId]" />
-  </div>
-</td>
+              <div class="grade-input-cell">
+                <input type="number" min="0" max="20" placeholder="0-20"
+                  [(ngModel)]="gradeInputs[s.studentId]" />
+              </div>
+            </td>
             <td>
-  <button class="btn-save-grade" (click)="gradeSubmission(selectedAssignment.id, s.studentId)">
-    ✓ Save Grade
-  </button>
-</td>
+              <button class="btn-save-grade" (click)="gradeSubmission(selectedAssignment.id, s.studentId)">
+                ✓ Save Grade
+              </button>
+            </td>
           </tr>
           <tr *ngIf="selectedAssignment?.submissions?.length === 0">
             <td colspan="6" style="text-align:center; color: #a0b0c0;">No submissions yet.</td>
