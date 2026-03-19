@@ -298,17 +298,22 @@ export class TeacherDashboardComponent implements OnInit {
   }
 
   sendMessage() {
-    if (!this.newMessage.trim() || !this.selectedStudent) return;
-    const message = {
-      senderId: this.currentUserId,
-      senderName: this.currentUserName,
-      receiverId: this.selectedStudent,
-      receiverName: this.selectedStudent,
-      content: this.newMessage.trim()
-    };
-    this.chatService.sendMessage(message);
-    this.newMessage = '';
-  }
+  if (!this.newMessage.trim() || !this.selectedStudent) return;
+  const message = {
+    senderId: this.currentUserId,
+    senderName: this.currentUserName,
+    receiverId: this.selectedStudent,
+    receiverName: this.selectedStudent,
+    content: this.newMessage.trim()
+  };
+  // Add message to UI instantly
+  this.currentMessages = [...this.currentMessages, {
+    ...message,
+    timestamp: new Date().toISOString()
+  }];
+  this.chatService.sendMessage(message);
+  this.newMessage = '';
+}
 
   onStudentSelected() {
     this.loadConversation();
