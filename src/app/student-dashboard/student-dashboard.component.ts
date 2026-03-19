@@ -115,6 +115,13 @@ export class StudentDashboardComponent implements OnInit {
   newMessage: string = '';
   currentMessages: any[] = [];
 
+  // AI Assistant
+aiMessages: { role: string; content: string }[] = [];
+aiInput: string = '';
+aiLoading: boolean = false;
+uploadedPdfBase64: string = '';
+uploadedPdfName: string = '';
+
   constructor(
     private router: Router,
     private authService: AuthService,
@@ -196,6 +203,7 @@ export class StudentDashboardComponent implements OnInit {
       case 'internship': return 'Internship Requests';
       case 'chat': return 'Chat with Teachers';
       case 'profile': return 'My Profile';
+      case 'ai': return 'AI Assistant';
       default: return 'Dashboard';
     }
   }
@@ -358,4 +366,90 @@ export class StudentDashboardComponent implements OnInit {
   getApprovedInternships(): number {
     return this.internships.filter(i => i.status === 'APPROVED').length;
   }
+
+  async sendAiMessage() {
+  if (!this.aiInput.trim() || this.aiLoading) return;
+
+  const userMessage = this.aiInput.trim();
+  this.aiInput = '';
+  this.aiLoading = true;
+
+  this.aiMessages = [...this.aiMessages, { role: 'user', content: userMessage }];
+
+  const studentContext = `You are EduSmart AI Assistant, a helpful academic assistant for a student.
+Here is the student's current data:
+
+Student Name: ${this.currentUserName}
+Class: ${this.studentClass || 'Not assigned yet'}
+Department: ${this.profile.department || 'Not assigned yet'}
+
+Assignments:
+${this.assignments.length === 0 ? 'No assignments yet.' : this.assignments.map(a => `
+- Title: ${a.title}
+  Subject: ${a.subject}
+  Due Date: ${a.dueDate}
+  Status: ${this.hasSubmitted(a) ? 'Submitted' : 'Not Submitted'}
+  Grade: ${this.getMySubmission(a)?.grade !== null && this.getMySubmission(a)?.grade !== undefined ? this.getMySubmission(a)?.grade + '/20' : 'Not graded yet'}
+`).join('')}
+
+Internship Requests:
+${this.internships.length === 0 ? 'No internship requests yet.' : this.internships.map(i => `
+- Company: ${i.company}, Duration: ${i.duration}, Status: ${i.status}
+`).join('')}
+
+Timetable for ${this.studentClass}:
+${this.getCurrentTimetable().length === 0 ? 'No timetable available.' : this.getCurrentTimetable().map(slot => `
+- ${slot.time}: Mon: ${slot.monday}, Tue: ${slot.tuesday}, Wed: ${slot.wednesday}, Thu: ${slot.thursday}, Fri: ${slot.friday}
+`).join('')}
+
+Answer the student's questions in English based on this data. Be friendly, concise and helpful.
+Keep answers short and to the point.
+If asked something not related to their academic data, still try to be helpful as an academic assistant.`;
+
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://localhost:8080/api/ai/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+     body: JSON.stringify({
+  system: studentContext,
+  pdfBase64: this.uploadedPdfBase64,
+  messages: this.aiMessages
+    .filter(m => m.role === 'user' || m.role === 'assistant')
+    .map(m => ({ role: m.role, content: m.content }))
+})
+    });
+
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || 'Sorry, I could not generate a response.';
+this.aiMessages = [...this.aiMessages, { role: 'assistant', content: reply }];
+this.uploadedPdfBase64 = ''; // Clear PDF after response
+this.uploadedPdfName = '';
+
+  } catch (error) {
+    this.aiMessages = [...this.aiMessages, {
+      role: 'assistant',
+      content: 'Sorry, I encountered an error. Please try again.'
+    }];
+  }
+
+  this.aiLoading = false;
+}
+onAiFileSelected(event: any) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const base64 = (reader.result as string).split(',')[1];
+    this.uploadedPdfBase64 = base64;
+    this.uploadedPdfName = file.name;
+    // Auto send a summarize message
+    this.aiInput = 'Please summarize this document for me.';
+    this.sendAiMessage();
+  };
+  reader.readAsDataURL(file);
+}
 }

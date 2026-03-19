@@ -16,6 +16,9 @@
       <div class="nav-item" [class.active]="activeSection === 'chat'" (click)="setSection('chat')">
         💬 Text My Teacher
       </div>
+      <div class="nav-item" [class.active]="activeSection === 'ai'" (click)="setSection('ai')">
+  🤖 AI Assistant
+</div>
       <div class="nav-item" [class.active]="activeSection === 'profile'" (click)="setSection('profile')">
         👤 My Profile
       </div>
@@ -333,5 +336,106 @@
       </div>
     </div>
   </div>
+
+  <!-- AI Assistant Section -->
+<div *ngIf="activeSection === 'ai'">
+  <div class="section-card" style="height: calc(100vh - 180px); display: flex; flex-direction: column;">
+
+    <div class="card-header" style="margin-bottom: 16px;">
+      <h3> EduSmart AI Assistant</h3>
+      <span style="color: #a0b0c0; font-size: 0.82rem;">Powered by Qwen AI — Ask me anything about your courses</span>
+    </div>
+
+    <!-- Messages Area -->
+    <div class="ai-messages" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 8px 0; margin-bottom: 16px;">
+
+      <!-- Welcome message -->
+      <div *ngIf="aiMessages.length === 0">
+        <div style="text-align: center; padding: 40px 20px;">
+          <div style="font-size: 3rem; margin-bottom: 16px;"></div>
+          <h4 style="color: #00d4ff; margin-bottom: 8px;">Hi {{ profile.firstName }}! I'm your EduSmart AI Assistant</h4>
+          <p style="color: #a0b0c0; font-size: 0.9rem; margin-bottom: 24px;">I have access to your assignments, grades, timetable and internship data. Ask me anything!</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+            <button class="ai-suggestion" (click)="aiInput = 'What assignments do I have pending?'; sendAiMessage()">
+              📋 Pending assignments?
+            </button>
+            <button class="ai-suggestion" (click)="aiInput = 'What are my grades so far?'; sendAiMessage()">
+              🎓 My grades?
+            </button>
+            <button class="ai-suggestion" (click)="aiInput = 'What is my timetable for this week?'; sendAiMessage()">
+              📅 My timetable?
+            </button>
+            <button class="ai-suggestion" (click)="aiInput = 'What is the status of my internship request?'; sendAiMessage()">
+              💼 Internship status?
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Messages -->
+      <div *ngFor="let msg of aiMessages"
+        [style.justify-content]="msg.role === 'user' ? 'flex-end' : 'flex-start'"
+        style="display: flex;">
+        <div
+          [style.background]="msg.role === 'user' ? 'rgba(0, 212, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)'"
+          [style.border-color]="msg.role === 'user' ? '#00d4ff' : 'rgba(255,255,255,0.1)'"
+          style="max-width: 70%; padding: 12px 16px; border-radius: 12px; border: 1px solid; color: #e0e0e0; font-size: 0.9rem; line-height: 1.6;">
+          <div *ngIf="msg.role === 'assistant'" style="color: #00d4ff; font-size: 0.78rem; margin-bottom: 4px; font-weight: 600;">
+             EduSmart AI
+          </div>
+          <div style="white-space: pre-wrap;">{{ msg.content }}</div>
+        </div>
+      </div>
+
+      <!-- Loading indicator -->
+      <div *ngIf="aiLoading" style="display: flex; justify-content: flex-start;">
+        <div style="padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+                    background: rgba(255,255,255,0.05); color: #a0b0c0; font-size: 0.9rem;">
+           Thinking...
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Input Area -->
+<div style="display: flex; flex-direction: column; gap: 8px;">
+
+  <!-- PDF Upload -->
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <label for="aiFileInput" style="cursor: pointer; padding: 6px 14px;
+      background: rgba(0, 212, 255, 0.08); color: #00d4ff;
+      border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 20px;
+      font-size: 0.8rem; font-family: Poppins, sans-serif;
+      transition: all 0.2s ease;">
+      📄 Upload PDF
+    </label>
+    <input type="file" id="aiFileInput" accept=".pdf"
+      (change)="onAiFileSelected($event)"
+      style="display: none;" />
+    <span *ngIf="uploadedPdfName" style="color: #00d4ff; font-size: 0.8rem;">
+      ✓ {{ uploadedPdfName }}
+    </span>
+    <span *ngIf="!uploadedPdfName" style="color: #a0b0c0; font-size: 0.78rem;">
+      Upload a PDF to summarize or ask questions about it
+    </span>
+  </div>
+
+  <!-- Text Input -->
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <input type="text" class="chat-input"
+      placeholder="Ask me about your assignments, grades, timetable or uploaded PDF..."
+      [(ngModel)]="aiInput"
+      (keyup.enter)="sendAiMessage()"
+      [disabled]="aiLoading"
+      style="flex: 1;" />
+    <button class="btn-send" (click)="sendAiMessage()" [disabled]="aiLoading">
+      {{ aiLoading ? '...' : 'Ask' }}
+    </button>
+  </div>
+
+</div>
+
+  </div>
+</div>
 
 </div>
