@@ -1,21 +1,94 @@
-<div class="hero-container">
+<div class="hero">
 
-    <nav class="navbar">
-        <div class="logo">🎓 EduSmart</div>
-    </nav>
-
-    <div class="hero-content">
-        <h1 class="hero-title">Welcome to <span>EduSmart</span></h1>
-        <p class="hero-subtitle">
-            A Smart College Management Platform that centralizes scheduling,
-            academic workflows, virtual classrooms, and communication —
-            all in one intelligent system.
-        </p>
-
-        <div class="hero-buttons">
-            <button class="btn-login" (click)="goToLogin()">Login</button>
-            <button class="btn-register" (click)="goToApplication()">Fill the information sheet</button>
-        </div>
+  <nav class="nav">
+    <div class="nav-logo">🎓 EduSmart</div>
+    
+    <div class="nav-btns">
+      <button class="nav-btn-out" (click)="goToLogin()">Login</button>
+      <button class="nav-btn-fill" (click)="goToApplication()">fill the application form</button>
     </div>
+  </nav>
+
+  <div class="hero-body">
+
+    <div class="hero-left">
+      <div class="hero-badge">
+        <div class="hero-badge-dot"></div>
+        Powered by Qwen AI — running locally
+      </div>
+      <h1 class="hero-h1">The <span class="accent">Smart</span> way<br>to manage <span class="dim">your college</span></h1>
+      <p class="hero-p">EduSmart centralizes everything — admissions, virtual classrooms, real-time communication, timetables, and AI-powered academic assistance — in one modern platform built for Tunisian higher education.</p>
+      <div class="hero-btns">
+        <button class="h-btn-primary" (click)="goToApplication()">fill the application form</button>
+        <button class="h-btn-secondary" (click)="goToLogin()">Login to Dashboard →</button>
+      </div>
+    </div>
+
+    <div class="hero-right">
+
+      <!-- AI Assistant Card -->
+      <div class="h-ai-card">
+        <div class="h-card-header">
+          <div class="h-card-icon ai-icon">🤖</div>
+          <div>
+            <div class="h-card-title">AI Student Assistant</div>
+            <div class="h-card-sub">Powered by Qwen 2.5</div>
+          </div>
+        </div>
+        <div class="h-ai-label">Student</div>
+        <div class="h-ai-msg">What assignments do I have pending?</div>
+        <div class="h-ai-label">EduSmart AI</div>
+        <div class="h-ai-reply">You have 2 pending assignments — "TP1 Algorithms" due March 15 and "Lab 2 Data Structures" due March 18. Don't forget to submit!</div>
+      </div>
+
+      <!-- Virtual Classroom Card -->
+      <div class="h-card">
+        <div class="h-card-header">
+          <div class="h-card-icon classroom-icon">🏫</div>
+          <div>
+            <div class="h-card-title">Virtual Classroom</div>
+            <div class="h-card-sub">DSI1 — Algorithms</div>
+          </div>
+        </div>
+        <div class="h-card-row">
+          <span class="h-card-row-label">TP1 — Sorting Algorithms</span>
+          <span class="badge-sm badge-green">Graded ✓</span>
+        </div>
+        <div class="h-card-row">
+          <span class="h-card-row-label">Lab 2 — Data Structures</span>
+          <span class="badge-sm badge-blue">Submitted</span>
+        </div>
+        <div class="h-card-row">
+          <span class="h-card-row-label">Project — Graph Traversal</span>
+          <span class="badge-sm badge-yellow">Pending</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Features Row -->
+  <div class="hero-features">
+    <div class="h-feat">
+      <div class="h-feat-icon">📋</div>
+      <div class="h-feat-title">Smart Admissions</div>
+      <div class="h-feat-desc">Automatic account creation and email credentials on approval.</div>
+    </div>
+    <div class="h-feat">
+      <div class="h-feat-icon">💬</div>
+      <div class="h-feat-title">Real-Time Chat</div>
+      <div class="h-feat-desc">WebSocket messaging between students and teachers instantly.</div>
+    </div>
+    <div class="h-feat">
+      <div class="h-feat-icon">🎓</div>
+      <div class="h-feat-title">Virtual Classroom</div>
+      <div class="h-feat-desc">Assignments, file submissions, and grading all in one place.</div>
+    </div>
+    <div class="h-feat">
+      <div class="h-feat-icon">🤖</div>
+      <div class="h-feat-title">AI Assistant</div>
+      <div class="h-feat-desc">Personalized academic help powered by local Qwen LLM.</div>
+    </div>
+  </div>
 
 </div>
