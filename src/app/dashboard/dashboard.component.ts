@@ -8,6 +8,7 @@ import { TeacherService } from '../services/teacher.service';
 import { CollegeClassService } from '../services/college-class.service';
 import { InternshipService } from '../services/internship.service';
 import { UserService } from '../services/user.service';
+import { RoomService } from '../services/room.service';
 
 interface Application {
   id: string;
@@ -91,6 +92,14 @@ export class DashboardComponent implements OnInit {
   newClass = { name: '', department: '', level: '', studentCount: 0, subjects: '' };
   editClass = { name: '', department: '', level: '', studentCount: 0, subjects: '' };
 
+  // Rooms
+rooms: any[] = [];
+showAddRoomModal: boolean = false;
+showEditRoomModal: boolean = false;
+selectedRoomForEdit: any = null;
+newRoom = { name: '', type: '', capacity: 0, department: '', available: true };
+editRoom = { name: '', type: '', capacity: 0, department: '', available: true };
+
   // Assign class modals
 showAssignStudentClassModal: boolean = false;
 showAssignTeacherClassesModal: boolean = false;
@@ -151,23 +160,25 @@ get filteredTimetableClasses(): string[] {
   };
 
   constructor(
-    private router: Router,
-    private applicationService: ApplicationService,
-    private authService: AuthService,
-    private teacherService: TeacherService,
-    private collegeClassService: CollegeClassService,
-    private internshipService: InternshipService,
-    private userService: UserService
-  ) {}
+  private router: Router,
+  private applicationService: ApplicationService,
+  private authService: AuthService,
+  private teacherService: TeacherService,
+  private collegeClassService: CollegeClassService,
+  private internshipService: InternshipService,
+  private userService: UserService,
+  private roomService: RoomService
+) {}
 
   ngOnInit() {
-    this.loadCurrentUser();
-    this.loadApplications();
-    this.loadTeachers();
-    this.loadClasses();
-    this.loadInternships();
-    this.loadStudents();
-  }
+  this.loadCurrentUser();
+  this.loadApplications();
+  this.loadTeachers();
+  this.loadClasses();
+  this.loadInternships();
+  this.loadStudents();
+  this.loadRooms();
+}
 
   loadCurrentUser() {
     const token = this.authService.getToken();
@@ -472,6 +483,72 @@ assignClassesToTeacher() {
     }
   }
 
+  loadRooms() {
+  this.roomService.getAllRooms().subscribe({
+    next: (data) => { this.rooms = data; },
+    error: (err) => console.error('Error loading rooms:', err)
+  });
+}
+
+openAddRoomModal() {
+  this.newRoom = { name: '', type: '', capacity: 0, department: '', available: true };
+  this.showAddRoomModal = true;
+}
+
+closeAddRoomModal() {
+  this.showAddRoomModal = false;
+}
+
+addRoom() {
+  if (!this.newRoom.name || !this.newRoom.type || !this.newRoom.capacity) return;
+  this.roomService.addRoom(this.newRoom).subscribe({
+    next: () => { this.loadRooms(); this.closeAddRoomModal(); },
+    error: (err) => console.error('Error adding room:', err)
+  });
+}
+
+openEditRoomModal(room: any) {
+  this.selectedRoomForEdit = room;
+  this.editRoom = {
+    name: room.name,
+    type: room.type,
+    capacity: room.capacity,
+    department: room.department || '',
+    available: room.available
+  };
+  this.showEditRoomModal = true;
+}
+
+closeEditRoomModal() {
+  this.showEditRoomModal = false;
+  this.selectedRoomForEdit = null;
+}
+
+updateRoom() {
+  if (!this.editRoom.name || !this.editRoom.type || !this.editRoom.capacity) return;
+  this.roomService.updateRoom(this.selectedRoomForEdit.id, this.editRoom).subscribe({
+    next: () => { this.loadRooms(); this.closeEditRoomModal(); },
+    error: (err) => console.error('Error updating room:', err)
+  });
+}
+
+deleteRoom(id: string) {
+  if (!confirm('Are you sure you want to delete this room?')) return;
+  this.roomService.deleteRoom(id).subscribe({
+    next: () => { this.loadRooms(); },
+    error: (err) => console.error('Error deleting room:', err)
+  });
+}
+
+getTotalRooms(): number { return this.rooms.length; }
+
+getAvailableRooms(): number {
+  return this.rooms.filter(r => r.available).length;
+}
+
+getRoomsByType(type: string): number {
+  return this.rooms.filter(r => r.type === type).length;
+}
   // Timetable
   selectClass(className: string) {
     this.selectedTimetableClass = className;
@@ -525,6 +602,7 @@ assignClassesToTeacher() {
       case 'internships': return 'Internship Management';
       case 'home': return 'Dashboard Overview';
       case 'students': return 'Students';
+      case 'rooms': return 'Room Management';
       default: return 'Dashboard';
     }
   }
