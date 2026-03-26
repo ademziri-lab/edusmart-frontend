@@ -653,3 +653,85 @@
   outline: none;
   border-color: #00d4ff;
 }
+
+.filter-row {
+  margin-bottom: 16px;
+}
+
+.filter-row select {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #e0e0e0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.filter-row select:focus {
+  outline: none;
+  border-color: #00d4ff;
+}
+
+.class-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.class-selector button {
+  padding: 8px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #a0b0c0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.class-selector button:hover {
+  background: rgba(0, 212, 255, 0.1);
+  color: #00d4ff;
+  border-color: #00d4ff;
+}
+
+.class-selector button.active {
+  background: rgba(0, 212, 255, 0.15);
+  color: #00d4ff;
+  border-color: #00d4ff;
+  font-weight: 600;
+}
+.btn-reject {
+  background-color: #e74c3c; /* red */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-reject:hover {
+  background-color: #c0392b;
+}
+
+.btn-approve {
+  background-color: #2ecc71; /* green */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-approve:hover {
+  background-color: #27ae60;
+}

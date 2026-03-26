@@ -7,6 +7,8 @@ import { AuthService } from '../services/auth.service';
 import { TeacherService } from '../services/teacher.service';
 import { CollegeClassService } from '../services/college-class.service';
 import { InternshipService } from '../services/internship.service';
+import { UserService } from '../services/user.service';
+import { RoomService } from '../services/room.service';
 
 interface Application {
   id: string;
@@ -62,7 +64,7 @@ interface Internship {
 })
 export class DashboardComponent implements OnInit {
 
-  activeSection: string = 'applications';
+  activeSection: string = 'home';
   loggedInName: string = '';
 
   // Data
@@ -90,7 +92,45 @@ export class DashboardComponent implements OnInit {
   newClass = { name: '', department: '', level: '', studentCount: 0, subjects: '' };
   editClass = { name: '', department: '', level: '', studentCount: 0, subjects: '' };
 
+  // Rooms
+rooms: any[] = [];
+showAddRoomModal: boolean = false;
+showEditRoomModal: boolean = false;
+selectedRoomForEdit: any = null;
+newRoom = { name: '', type: '', capacity: 0, department: '', available: true };
+editRoom = { name: '', type: '', capacity: 0, department: '', available: true };
+
+  // Assign class modals
+showAssignStudentClassModal: boolean = false;
+showAssignTeacherClassesModal: boolean = false;
+selectedUserForAssign: any = null;
+selectedClassForAssign: string = '';
+selectedClassesForTeacher: string[] = [];
+students: any[] = [];
+
+  selectedDepartmentFilter: string = '';
+  get filteredClasses(): any[] {
+  if (!this.selectedDepartmentFilter) return this.classes;
+  return this.classes.filter(c => c.department === this.selectedDepartmentFilter);
+}
+
+get availableDepartments(): string[] {
+  return [...new Set(this.classes.map(c => c.department))];
+}
+
   // Timetable
+  selectedTimetableDepartment: string = '';
+
+get timetableDepartments(): string[] {
+  return [...new Set(this.classes.map(c => c.department))];
+}
+
+get filteredTimetableClasses(): string[] {
+  if (!this.selectedTimetableDepartment) return this.classes.map(c => c.name);
+  return this.classes
+    .filter(c => c.department === this.selectedTimetableDepartment)
+    .map(c => c.name);
+}
   selectedTimetableClass: string = 'DSI1';
   timetables: { [key: string]: TimetableSlot[] } = {
     'DSI1': [
@@ -120,21 +160,25 @@ export class DashboardComponent implements OnInit {
   };
 
   constructor(
-    private router: Router,
-    private applicationService: ApplicationService,
-    private authService: AuthService,
-    private teacherService: TeacherService,
-    private collegeClassService: CollegeClassService,
-    private internshipService: InternshipService
-  ) {}
+  private router: Router,
+  private applicationService: ApplicationService,
+  private authService: AuthService,
+  private teacherService: TeacherService,
+  private collegeClassService: CollegeClassService,
+  private internshipService: InternshipService,
+  private userService: UserService,
+  private roomService: RoomService
+) {}
 
   ngOnInit() {
-    this.loadCurrentUser();
-    this.loadApplications();
-    this.loadTeachers();
-    this.loadClasses();
-    this.loadInternships();
-  }
+  this.loadCurrentUser();
+  this.loadApplications();
+  this.loadTeachers();
+  this.loadClasses();
+  this.loadInternships();
+  this.loadStudents();
+  this.loadRooms();
+}
 
   loadCurrentUser() {
     const token = this.authService.getToken();
@@ -171,6 +215,80 @@ export class DashboardComponent implements OnInit {
       error: (err) => console.error('Error loading internships:', err)
     });
   }
+
+  loadStudents() {
+  this.userService.getStudents().subscribe({
+    next: (data) => { this.students = data; },
+    error: (err) => console.error('Error loading students:', err)
+  });
+}
+
+// Open assign class modal for student
+openAssignStudentClassModal(student: any) {
+  this.selectedUserForAssign = student;
+  this.selectedClassForAssign = student.className || '';
+  this.showAssignStudentClassModal = true;
+}
+
+closeAssignStudentClassModal() {
+  this.showAssignStudentClassModal = false;
+  this.selectedUserForAssign = null;
+  this.selectedClassForAssign = '';
+}
+
+assignClassToStudent() {
+  if (!this.selectedClassForAssign) return;
+  this.userService.assignClassToStudent(
+    this.selectedUserForAssign.id,
+    this.selectedClassForAssign
+  ).subscribe({
+    next: () => {
+      this.loadStudents();
+      this.closeAssignStudentClassModal();
+    },
+    error: (err) => console.error('Error assigning class:', err)
+  });
+}
+
+// Open assign classes modal for teacher
+openAssignTeacherClassesModal(teacher: any) {
+  this.selectedUserForAssign = teacher;
+  this.selectedClassesForTeacher = teacher.assignedClasses || [];
+  this.showAssignTeacherClassesModal = true;
+}
+
+closeAssignTeacherClassesModal() {
+  this.showAssignTeacherClassesModal = false;
+  this.selectedUserForAssign = null;
+  this.selectedClassesForTeacher = [];
+}
+
+toggleClassForTeacher(className: string) {
+  const index = this.selectedClassesForTeacher.indexOf(className);
+  if (index === -1) {
+    this.selectedClassesForTeacher.push(className);
+  } else {
+    this.selectedClassesForTeacher.splice(index, 1);
+  }
+}
+
+isClassSelectedForTeacher(className: string): boolean {
+  return this.selectedClassesForTeacher.includes(className);
+}
+
+assignClassesToTeacher() {
+  if (this.selectedClassesForTeacher.length === 0) return;
+  this.userService.assignClassesToTeacher(
+    this.selectedUserForAssign.id,
+    this.selectedClassesForTeacher
+  ).subscribe({
+    next: () => {
+      this.loadTeachers();
+      this.closeAssignTeacherClassesModal();
+    },
+    error: (err) => console.error('Error assigning classes:', err)
+  });
+}
 
   // Applications
   viewApplication(app: any) {
@@ -299,8 +417,8 @@ export class DashboardComponent implements OnInit {
 
   // Classes
   getTotalStudents(): number {
-    return this.classes.reduce((total, c) => total + c.studentCount, 0);
-  }
+  return this.applications.filter(a => a.status === 'APPROVED').length;
+}
 
   openAddClassModal() { this.showAddClassModal = true; }
 
@@ -365,6 +483,72 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  loadRooms() {
+  this.roomService.getAllRooms().subscribe({
+    next: (data) => { this.rooms = data; },
+    error: (err) => console.error('Error loading rooms:', err)
+  });
+}
+
+openAddRoomModal() {
+  this.newRoom = { name: '', type: '', capacity: 0, department: '', available: true };
+  this.showAddRoomModal = true;
+}
+
+closeAddRoomModal() {
+  this.showAddRoomModal = false;
+}
+
+addRoom() {
+  if (!this.newRoom.name || !this.newRoom.type || !this.newRoom.capacity) return;
+  this.roomService.addRoom(this.newRoom).subscribe({
+    next: () => { this.loadRooms(); this.closeAddRoomModal(); },
+    error: (err) => console.error('Error adding room:', err)
+  });
+}
+
+openEditRoomModal(room: any) {
+  this.selectedRoomForEdit = room;
+  this.editRoom = {
+    name: room.name,
+    type: room.type,
+    capacity: room.capacity,
+    department: room.department || '',
+    available: room.available
+  };
+  this.showEditRoomModal = true;
+}
+
+closeEditRoomModal() {
+  this.showEditRoomModal = false;
+  this.selectedRoomForEdit = null;
+}
+
+updateRoom() {
+  if (!this.editRoom.name || !this.editRoom.type || !this.editRoom.capacity) return;
+  this.roomService.updateRoom(this.selectedRoomForEdit.id, this.editRoom).subscribe({
+    next: () => { this.loadRooms(); this.closeEditRoomModal(); },
+    error: (err) => console.error('Error updating room:', err)
+  });
+}
+
+deleteRoom(id: string) {
+  if (!confirm('Are you sure you want to delete this room?')) return;
+  this.roomService.deleteRoom(id).subscribe({
+    next: () => { this.loadRooms(); },
+    error: (err) => console.error('Error deleting room:', err)
+  });
+}
+
+getTotalRooms(): number { return this.rooms.length; }
+
+getAvailableRooms(): number {
+  return this.rooms.filter(r => r.available).length;
+}
+
+getRoomsByType(type: string): number {
+  return this.rooms.filter(r => r.type === type).length;
+}
   // Timetable
   selectClass(className: string) {
     this.selectedTimetableClass = className;
@@ -416,9 +600,24 @@ export class DashboardComponent implements OnInit {
       case 'classes': return 'Classes Management';
       case 'timetable': return 'Timetable Generator';
       case 'internships': return 'Internship Management';
+      case 'home': return 'Dashboard Overview';
+      case 'students': return 'Students';
+      case 'rooms': return 'Room Management';
       default: return 'Dashboard';
     }
   }
+
+  getAssignedStudentsCount(): number {
+  return this.students.filter(s => s.className).length;
+}
+
+getUnassignedStudentsCount(): number {
+  return this.students.filter(s => !s.className).length;
+}
+
+
+
+  
 
   logout() { this.authService.logout(); }
 }

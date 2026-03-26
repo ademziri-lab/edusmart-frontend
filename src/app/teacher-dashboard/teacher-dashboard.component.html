@@ -10,6 +10,9 @@
       <div class="nav-item" [class.active]="activeSection === 'classroom'" (click)="setSection('classroom')">
         🏫 Virtual Classroom
       </div>
+      <div class="nav-item" [class.active]="activeSection === 'attendance'" (click)="setSection('attendance')">
+  📝 Attendance
+</div>
       <div class="nav-item" [class.active]="activeSection === 'chat'" (click)="setSection('chat')">
         💬 Chat with Students
       </div>
@@ -41,28 +44,55 @@
       <div *ngIf="activeSection === 'timetable'">
         <div class="section-card">
           <h3>My Teaching Schedule</h3>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Monday</th>
-                <th>Tuesday</th>
-                <th>Wednesday</th>
-                <th>Thursday</th>
-                <th>Friday</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let slot of timetable">
-                <td class="time-slot">{{ slot.time }}</td>
-                <td [class.subject-cell]="slot.monday !== '—'">{{ slot.monday }}</td>
-                <td [class.subject-cell]="slot.tuesday !== '—'">{{ slot.tuesday }}</td>
-                <td [class.subject-cell]="slot.wednesday !== '—'">{{ slot.wednesday }}</td>
-                <td [class.subject-cell]="slot.thursday !== '—'">{{ slot.thursday }}</td>
-                <td [class.subject-cell]="slot.friday !== '—'">{{ slot.friday }}</td>
-              </tr>
-            </tbody>
-          </table>
+
+          <!-- Department Filter -->
+          <div class="filter-row">
+            <select [(ngModel)]="selectedTimetableDepartment" name="timetableDeptFilter"
+              (ngModelChange)="selectedTimetableClass = ''">
+              <option value="">All Departments</option>
+              <option *ngFor="let dept of timetableDepartments" [value]="dept">{{ dept }}</option>
+            </select>
+          </div>
+
+          <!-- Class Selector -->
+          <div class="class-selector">
+            <button *ngFor="let c of filteredTimetableClasses"
+              [class.active]="selectedTimetableClass === c.name"
+              (click)="selectedTimetableClass = c.name">
+              {{ c.name }}
+            </button>
+          </div>
+
+          <div *ngIf="selectedTimetableClass">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Monday</th>
+                  <th>Tuesday</th>
+                  <th>Wednesday</th>
+                  <th>Thursday</th>
+                  <th>Friday</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let slot of getCurrentTimetable()">
+                  <td class="time-slot">{{ slot.time }}</td>
+                  <td [class.subject-cell]="slot.monday !== '—'">{{ slot.monday }}</td>
+                  <td [class.subject-cell]="slot.tuesday !== '—'">{{ slot.tuesday }}</td>
+                  <td [class.subject-cell]="slot.wednesday !== '—'">{{ slot.wednesday }}</td>
+                  <td [class.subject-cell]="slot.thursday !== '—'">{{ slot.thursday }}</td>
+                  <td [class.subject-cell]="slot.friday !== '—'">{{ slot.friday }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngIf="!selectedTimetableClass"
+            style="text-align:center; color: #a0b0c0; padding: 40px 0;">
+            Select a department and class to view the timetable.
+          </div>
+
         </div>
       </div>
 
@@ -103,7 +133,7 @@
                 <td>{{ a.subject }}</td>
                 <td>{{ a.dueDate }}</td>
                 <td>
-                  <button *ngIf="a.fileData" class="btn-view"
+                  <button *ngIf="a.fileData" class="btn-download"
                     (click)="downloadFile(a.fileData, a.fileName, a.fileType)">
                     📄 Download
                   </button>
@@ -153,7 +183,25 @@
           </div>
         </div>
       </div>
-
+      <!-- Attendance Section -->
+<div *ngIf="activeSection === 'attendance'">
+  <div class="section-card">
+    <div class="card-header">
+      <h3>Take Attendance</h3>
+      <button class="btn-add" (click)="openAttendanceModal()">+ New Session</button>
+    </div>
+    <p style="color: #a0b0c0; font-size: 0.9rem; padding: 20px 0;">
+      Click "New Session" to take attendance for your current class.
+      Select the class and subject, then mark each student as present or absent.
+    </p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <div *ngFor="let c of assignedClasses" class="stat-card" style="cursor: default;">
+        <span class="stat-number">{{ c }}</span>
+        <span class="stat-label">Assigned Class</span>
+      </div>
+    </div>
+  </div>
+</div>
       <!-- Profile Section -->
       <div *ngIf="activeSection === 'profile'">
         <div class="section-card">
@@ -183,6 +231,12 @@
               <span class="profile-label">Subjects</span>
               <span class="profile-value">{{ profile.subjects }}</span>
             </div>
+            <div class="profile-item">
+              <span class="profile-label">Assigned Classes</span>
+              <span class="profile-value">
+                {{ assignedClasses.length > 0 ? assignedClasses.join(', ') : 'Not assigned yet' }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -209,8 +263,10 @@
       </div>
       <div class="form-group">
         <label>Class</label>
-        <input type="text" placeholder="e.g. DSI1"
-          [(ngModel)]="newAssignment.className" name="aClass" />
+        <select [(ngModel)]="newAssignment.className" name="aClass">
+          <option value="" disabled>Select a class</option>
+          <option *ngFor="let c of assignedClasses" [value]="c">{{ c }}</option>
+        </select>
       </div>
       <div class="form-group">
         <label>Due Date</label>
@@ -258,23 +314,22 @@
             <td>{{ s.studentName }}</td>
             <td>{{ s.submittedAt }}</td>
             <td>
-              <td>
-  <button class="btn-download" (click)="downloadFile(s.fileData, s.fileName, s.fileType)">
-    📄 Download
-  </button>
-</td>
+              <button class="btn-download" (click)="downloadFile(s.fileData, s.fileName, s.fileType)">
+                📄 Download
+              </button>
+            </td>
             <td><span class="badge {{ s.status | lowercase }}">{{ s.status }}</span></td>
             <td>
-  <div class="grade-input-cell">
-    <input type="number" min="0" max="20" placeholder="0-20"
-      [(ngModel)]="gradeInputs[s.studentId]" />
-  </div>
-</td>
+              <div class="grade-input-cell">
+                <input type="number" min="0" max="20" placeholder="0-20"
+                  [(ngModel)]="gradeInputs[s.studentId]" />
+              </div>
+            </td>
             <td>
-  <button class="btn-save-grade" (click)="gradeSubmission(selectedAssignment.id, s.studentId)">
-    ✓ Save Grade
-  </button>
-</td>
+              <button class="btn-save-grade" (click)="gradeSubmission(selectedAssignment.id, s.studentId)">
+                ✓ Save Grade
+              </button>
+            </td>
           </tr>
           <tr *ngIf="selectedAssignment?.submissions?.length === 0">
             <td colspan="6" style="text-align:center; color: #a0b0c0;">No submissions yet.</td>
@@ -286,5 +341,104 @@
       </div>
     </div>
   </div>
+  <!-- Attendance Modal -->
+<div class="modal-overlay" *ngIf="showAttendanceModal" (click)="closeAttendanceModal()">
+  <div class="modal-card modal-large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>📝 New Attendance Session</h3>
+      <span class="modal-close" (click)="closeAttendanceModal()">✕</span>
+    </div>
 
+    <!-- Class and Subject Selection -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+      <div class="form-group">
+        <label>Class</label>
+        <select [(ngModel)]="attendanceClass" name="attClass"
+          (ngModelChange)="loadAttendanceStudents()">
+          <option value="" disabled>Select a class</option>
+          <option *ngFor="let c of assignedClasses" [value]="c">{{ c }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Subject</label>
+        <input type="text" placeholder="e.g. Algorithms"
+          [(ngModel)]="attendanceSubject" name="attSubject" />
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div *ngIf="attendanceStudents.length > 0" class="stats-row" style="margin-bottom: 16px;">
+      <div class="stat-card">
+        <span class="stat-number">{{ attendanceStudents.length }}</span>
+        <span class="stat-label">Total Students</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" style="color: #27ae60;">{{ getPresentCount() }}</span>
+        <span class="stat-label">Present</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" style="color: #e74c3c;">{{ getAbsentCount() }}</span>
+        <span class="stat-label">Absent</span>
+      </div>
+    </div>
+
+    <!-- Students List -->
+    <div *ngIf="attendanceStudents.length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of attendanceStudents"
+            [style.background]="s.present ? 'rgba(39,174,96,0.04)' : 'rgba(231,76,60,0.04)'">
+            <td>{{ s.firstName }} {{ s.lastName }}</td>
+            <td style="color: #a0b0c0;">{{ s.email }}</td>
+            <td>
+              <span *ngIf="s.present" class="badge approved">✓ Present</span>
+              <span *ngIf="!s.present" class="badge rejected">✗ Absent</span>
+            </td>
+            <td>
+              <button *ngIf="s.present" class="btn-reject"
+                (click)="toggleAttendance(s.id)"
+                style="font-size: 0.78rem; padding: 5px 12px;">
+                Mark Absent
+              </button>
+              <button *ngIf="!s.present" class="btn-approve"
+                (click)="toggleAttendance(s.id)"
+                style="font-size: 0.78rem; padding: 5px 12px;">
+                Mark Present
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="attendanceStudents.length === 0 && attendanceClass"
+      style="text-align: center; padding: 30px; color: #a0b0c0;">
+      No students found in {{ attendanceClass }}.
+    </div>
+
+    <div *ngIf="!attendanceClass"
+      style="text-align: center; padding: 30px; color: #a0b0c0;">
+      Select a class to load students.
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="closeAttendanceModal()">Cancel</button>
+      <button class="btn-add"
+        (click)="saveAttendance()"
+        [disabled]="attendanceSaving || attendanceStudents.length === 0 || !attendanceSubject">
+        {{ attendanceSaving ? '⏳ Saving...' : '✓ Save Attendance' }}
+      </button>
+    </div>
+
+  </div>
+</div>
 </div>

@@ -4,14 +4,24 @@
     <aside class="sidebar">
         <div class="sidebar-logo">🎓 EduSmart</div>
         <nav class="sidebar-nav">
-            <div class="nav-item" [class.active]="activeSection === 'applications'" (click)="setSection('applications')">
+            <div class="nav-item" [class.active]="activeSection === 'home'" (click)="setSection('home')">
+                🏠 Home
+            </div>
+            <div class="nav-item" [class.active]="activeSection === 'applications'"
+                (click)="setSection('applications')">
                 📋 Applications
+            </div>
+            <div class="nav-item" [class.active]="activeSection === 'students'" (click)="setSection('students')">
+                👨‍🎓 Students
             </div>
             <div class="nav-item" [class.active]="activeSection === 'teachers'" (click)="setSection('teachers')">
                 👨‍🏫 Teachers
             </div>
             <div class="nav-item" [class.active]="activeSection === 'classes'" (click)="setSection('classes')">
                 🏫 Classes
+            </div>
+            <div class="nav-item" [class.active]="activeSection === 'rooms'" (click)="setSection('rooms')">
+                🚪 Rooms
             </div>
             <div class="nav-item" [class.active]="activeSection === 'timetable'" (click)="setSection('timetable')">
                 📅 Timetable
@@ -39,6 +49,83 @@
 
         <!-- Content Area -->
         <div class="content-area">
+
+            <!-- Home Section -->
+            <div *ngIf="activeSection === 'home'">
+                <div class="stats-row">
+                    <div class="stat-card home-stat">
+                        <span class="home-stat-icon">👨‍🎓</span>
+                        <span class="stat-number">{{ getTotalStudents() }}</span>
+                        <span class="stat-label">Total Students</span>
+                    </div>
+                    <div class="stat-card home-stat">
+                        <span class="home-stat-icon">👨‍🏫</span>
+                        <span class="stat-number">{{ getTotalTeachers() }}</span>
+                        <span class="stat-label">Total Teachers</span>
+                    </div>
+                    <div class="stat-card home-stat">
+                        <span class="home-stat-icon">🏫</span>
+                        <span class="stat-number">{{ classes.length }}</span>
+                        <span class="stat-label">Total Classes</span>
+                    </div>
+                    <div class="stat-card home-stat">
+                        <span class="home-stat-icon">📋</span>
+                        <span class="stat-number">{{ getPendingApplications() }}</span>
+                        <span class="stat-label">Pending Applications</span>
+                    </div>
+                </div>
+                <div class="section-card">
+                    <div class="card-header">
+                        <h3>Recent Applications</h3>
+                        <button class="btn-add" (click)="setSection('applications')">View All</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let app of applications.slice(0, 5)">
+                                <td>{{ app.firstNameFr }} {{ app.lastNameFr }}</td>
+                                <td>{{ app.department }}</td>
+                                <td><span class="badge {{ app.status | lowercase }}">{{ app.status }}</span></td>
+                            </tr>
+                            <tr *ngIf="applications.length === 0">
+                                <td colspan="3" style="text-align:center; color: #a0b0c0;">No applications yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="section-card">
+                    <div class="card-header">
+                        <h3>Recent Internship Requests</h3>
+                        <button class="btn-add" (click)="setSection('internships')">View All</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Company</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let i of internships.slice(0, 5)">
+                                <td>{{ i.studentName }}</td>
+                                <td>{{ i.company }}</td>
+                                <td><span class="badge {{ i.status | lowercase }}">{{ i.status }}</span></td>
+                            </tr>
+                            <tr *ngIf="internships.length === 0">
+                                <td colspan="3" style="text-align:center; color: #a0b0c0;">No internship requests yet.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             <!-- Applications Section -->
             <div *ngIf="activeSection === 'applications'">
@@ -80,11 +167,63 @@
                                         <span class="badge processing">⏳ Processing...</span>
                                     </ng-container>
                                     <ng-template #actionButtons>
-                                        <button class="btn-approve" *ngIf="app.status === 'PENDING'" (click)="approveApplication(app.id)">Approve</button>
-                                        <button class="btn-reject" *ngIf="app.status === 'PENDING'" (click)="rejectApplication(app.id)">Reject</button>
+                                        <button class="btn-approve" *ngIf="app.status === 'PENDING'"
+                                            (click)="approveApplication(app.id)">Approve</button>
+                                        <button class="btn-reject" *ngIf="app.status === 'PENDING'"
+                                            (click)="rejectApplication(app.id)">Reject</button>
                                         <button class="btn-delete" (click)="deleteApplication(app.id)">Delete</button>
                                     </ng-template>
                                 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Students Section -->
+            <div *ngIf="activeSection === 'students'">
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <span class="stat-number">{{ students.length }}</span>
+                        <span class="stat-label">Total Students</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">{{ getAssignedStudentsCount() }}</span>
+                        <span class="stat-label">Assigned to Class</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">{{ getUnassignedStudentsCount() }}</span>
+                        <span class="stat-label">Not Assigned</span>
+                    </div>
+                </div>
+                <div class="section-card">
+                    <h3>Students List</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Class</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let s of students">
+                                <td>{{ s.firstName }} {{ s.lastName }}</td>
+                                <td>{{ s.email }}</td>
+                                <td>{{ s.department || '—' }}</td>
+                                <td>
+                                    <span *ngIf="s.className" class="badge approved">{{ s.className }}</span>
+                                    <span *ngIf="!s.className" class="badge pending">Not Assigned</span>
+                                </td>
+                                <td>
+                                    <button class="btn-edit" (click)="openAssignStudentClassModal(s)">Assign
+                                        Class</button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="students.length === 0">
+                                <td colspan="5" style="text-align:center; color: #a0b0c0;">No students yet.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -126,6 +265,8 @@
                                 <td>{{ teacher.subjects }}</td>
                                 <td>
                                     <button class="btn-edit" (click)="openEditTeacherModal(teacher)">Edit</button>
+                                    <button class="btn-edit" (click)="openAssignTeacherClassesModal(teacher)">Assign
+                                        Classes</button>
                                     <button class="btn-delete" (click)="deleteTeacher(teacher.id)">Delete</button>
                                 </td>
                             </tr>
@@ -151,6 +292,12 @@
                         <h3>Classes List</h3>
                         <button class="btn-add" (click)="openAddClassModal()">+ Add Class</button>
                     </div>
+                    <div class="filter-row">
+                        <select [(ngModel)]="selectedDepartmentFilter" name="deptFilter">
+                            <option value="">All Departments</option>
+                            <option *ngFor="let dept of availableDepartments" [value]="dept">{{ dept }}</option>
+                        </select>
+                    </div>
                     <table class="data-table">
                         <thead>
                             <tr>
@@ -163,7 +310,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let c of classes">
+                            <tr *ngFor="let c of filteredClasses">
                                 <td>{{ c.name }}</td>
                                 <td>{{ c.department }}</td>
                                 <td>{{ c.level }}</td>
@@ -187,9 +334,15 @@
                         <button class="btn-add">Generate Timetable</button>
                     </div>
                     <p class="placeholder-text">Select a class to view its generated timetable.</p>
+                    <div class="filter-row">
+                        <select [(ngModel)]="selectedTimetableDepartment" name="timetableDeptFilter"
+                            (ngModelChange)="selectedTimetableClass = ''">
+                            <option value="">All Departments</option>
+                            <option *ngFor="let dept of timetableDepartments" [value]="dept">{{ dept }}</option>
+                        </select>
+                    </div>
                     <div class="class-selector">
-                        <button *ngFor="let t of ['DSI1','DSI2','DSI3','GL1']"
-                            [class.active]="selectedTimetableClass === t"
+                        <button *ngFor="let t of filteredTimetableClasses" [class.active]="selectedTimetableClass === t"
                             (click)="selectClass(t)">
                             {{ t }}
                         </button>
@@ -248,12 +401,75 @@
                                 <td>{{ internship.studentName }}</td>
                                 <td>{{ internship.company }}</td>
                                 <td>{{ internship.duration }}</td>
-                                <td><span class="badge {{ internship.status | lowercase }}">{{ internship.status }}</span></td>
+                                <td><span class="badge {{ internship.status | lowercase }}">{{ internship.status
+                                        }}</span></td>
                                 <td>
-                                    <button class="btn-approve" *ngIf="internship.status === 'PENDING'" (click)="approveInternship(internship.id)">Approve</button>
-                                    <button class="btn-reject" *ngIf="internship.status === 'PENDING'" (click)="rejectInternship(internship.id)">Reject</button>
+                                    <button class="btn-approve" *ngIf="internship.status === 'PENDING'"
+                                        (click)="approveInternship(internship.id)">Approve</button>
+                                    <button class="btn-reject" *ngIf="internship.status === 'PENDING'"
+                                        (click)="rejectInternship(internship.id)">Reject</button>
                                     <button class="btn-delete" (click)="deleteInternship(internship.id)">Delete</button>
                                 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Rooms Section -->
+            <div *ngIf="activeSection === 'rooms'">
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <span class="stat-number">{{ getTotalRooms() }}</span>
+                        <span class="stat-label">Total Rooms</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">{{ getAvailableRooms() }}</span>
+                        <span class="stat-label">Available</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">{{ getRoomsByType('Lab') }}</span>
+                        <span class="stat-label">Labs</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">{{ getRoomsByType('Lecture Hall') }}</span>
+                        <span class="stat-label">Lecture Halls</span>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="card-header">
+                        <h3>Rooms List</h3>
+                        <button class="btn-add" (click)="openAddRoomModal()">+ Add Room</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Room Name</th>
+                                <th>Type</th>
+                                <th>Capacity</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let r of rooms">
+                                <td>{{ r.name }}</td>
+                                <td>{{ r.type }}</td>
+                                <td>{{ r.capacity }} seats</td>
+                                <td>{{ r.department || '—' }}</td>
+                                <td>
+                                    <span *ngIf="r.available" class="badge approved">Available</span>
+                                    <span *ngIf="!r.available" class="badge rejected">Unavailable</span>
+                                </td>
+                                <td>
+                                    <button class="btn-edit" (click)="openEditRoomModal(r)">Edit</button>
+                                    <button class="btn-delete" (click)="deleteRoom(r.id)">Delete</button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="rooms.length === 0">
+                                <td colspan="6" style="text-align:center; color: #a0b0c0;">No rooms added yet.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -272,11 +488,13 @@
             </div>
             <div class="form-group">
                 <label>Full Name</label>
-                <input type="text" placeholder="e.g. Dr. Karim Bouaziz" [(ngModel)]="newTeacher.fullName" name="teacherName" />
+                <input type="text" placeholder="e.g. Dr. Karim Bouaziz" [(ngModel)]="newTeacher.fullName"
+                    name="teacherName" />
             </div>
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" placeholder="e.g. k.bouaziz@edusmart.com" [(ngModel)]="newTeacher.email" name="teacherEmail" />
+                <input type="email" placeholder="e.g. k.bouaziz@edusmart.com" [(ngModel)]="newTeacher.email"
+                    name="teacherEmail" />
             </div>
             <div class="form-group">
                 <label>Department</label>
@@ -291,7 +509,8 @@
             </div>
             <div class="form-group">
                 <label>Subjects (comma separated)</label>
-                <input type="text" placeholder="e.g. Algorithms, Data Structures" [(ngModel)]="newTeacher.subjects" name="teacherSubjects" />
+                <input type="text" placeholder="e.g. Algorithms, Data Structures" [(ngModel)]="newTeacher.subjects"
+                    name="teacherSubjects" />
             </div>
             <div class="modal-actions">
                 <button class="btn-cancel" (click)="closeAddTeacherModal()">Cancel</button>
@@ -378,7 +597,8 @@
             </div>
             <div class="form-group">
                 <label>Subjects (comma separated)</label>
-                <input type="text" placeholder="e.g. Algorithms, Databases" [(ngModel)]="newClass.subjects" name="classSubjects" />
+                <input type="text" placeholder="e.g. Algorithms, Databases" [(ngModel)]="newClass.subjects"
+                    name="classSubjects" />
             </div>
             <div class="modal-actions">
                 <button class="btn-cancel" (click)="closeAddClassModal()">Cancel</button>
@@ -555,5 +775,152 @@
             </div>
         </div>
     </div>
+
+    <!-- Assign Class to Student Modal -->
+    <div class="modal-overlay" *ngIf="showAssignStudentClassModal" (click)="closeAssignStudentClassModal()">
+        <div class="modal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Assign Class — {{ selectedUserForAssign?.firstName }} {{ selectedUserForAssign?.lastName }}</h3>
+                <span class="modal-close" (click)="closeAssignStudentClassModal()">✕</span>
+            </div>
+            <div class="form-group">
+                <label>Select Class</label>
+                <select [(ngModel)]="selectedClassForAssign" name="assignClass">
+                    <option value="" disabled>Select a class</option>
+                    <option *ngFor="let c of classes" [value]="c.name">{{ c.name }} — {{ c.department }}</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" (click)="closeAssignStudentClassModal()">Cancel</button>
+                <button class="btn-add" (click)="assignClassToStudent()">Assign</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Classes to Teacher Modal -->
+    <div class="modal-overlay" *ngIf="showAssignTeacherClassesModal" (click)="closeAssignTeacherClassesModal()">
+        <div class="modal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Assign Classes — {{ selectedUserForAssign?.firstName }} {{ selectedUserForAssign?.lastName }}</h3>
+                <span class="modal-close" (click)="closeAssignTeacherClassesModal()">✕</span>
+            </div>
+            <div class="form-group">
+                <label>Select Classes (can select multiple)</label>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+                    <div *ngFor="let c of classes" (click)="toggleClassForTeacher(c.name)" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+                               background: rgba(255,255,255,0.03); border-radius: 8px; cursor: pointer;
+                               border: 1px solid rgba(255,255,255,0.08);"
+                        [style.border-color]="isClassSelectedForTeacher(c.name) ? '#00d4ff' : 'rgba(255,255,255,0.08)'"
+                        [style.background]="isClassSelectedForTeacher(c.name) ? 'rgba(0,212,255,0.08)' : 'rgba(255,255,255,0.03)'">
+                        <span style="font-size: 1.1rem;">{{ isClassSelectedForTeacher(c.name) ? '✅' : '⬜' }}</span>
+                        <span style="color: #e0e0e0;">{{ c.name }}</span>
+                        <span style="color: #a0b0c0; font-size: 0.82rem;">— {{ c.department }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" (click)="closeAssignTeacherClassesModal()">Cancel</button>
+                <button class="btn-add" (click)="assignClassesToTeacher()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Room Modal -->
+<div class="modal-overlay" *ngIf="showAddRoomModal" (click)="closeAddRoomModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Add New Room</h3>
+      <span class="modal-close" (click)="closeAddRoomModal()">✕</span>
+    </div>
+    <div class="form-group">
+      <label>Room Name</label>
+      <input type="text" placeholder="e.g. Salle A1" [(ngModel)]="newRoom.name" name="roomName" />
+    </div>
+    <div class="form-group">
+      <label>Type</label>
+      <select [(ngModel)]="newRoom.type" name="roomType">
+        <option value="" disabled selected>Select type</option>
+        <option>Classroom</option>
+        <option>Lab</option>
+        <option>Lecture Hall</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Capacity</label>
+      <input type="number" placeholder="e.g. 30" [(ngModel)]="newRoom.capacity" name="roomCapacity" />
+    </div>
+    <div class="form-group">
+      <label>Department (optional)</label>
+      <select [(ngModel)]="newRoom.department" name="roomDepartment">
+        <option value="">All Departments</option>
+        <option>Computer Science</option>
+        <option>Mathematics</option>
+        <option>Physics</option>
+        <option>Civil Engineering</option>
+        <option>Electrical Engineering</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select [(ngModel)]="newRoom.available" name="roomAvailable">
+        <option [ngValue]="true">Available</option>
+        <option [ngValue]="false">Unavailable</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="closeAddRoomModal()">Cancel</button>
+      <button class="btn-add" (click)="addRoom()">Add Room</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Room Modal -->
+<div class="modal-overlay" *ngIf="showEditRoomModal" (click)="closeEditRoomModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Edit Room</h3>
+      <span class="modal-close" (click)="closeEditRoomModal()">✕</span>
+    </div>
+    <div class="form-group">
+      <label>Room Name</label>
+      <input type="text" [(ngModel)]="editRoom.name" name="editRoomName" />
+    </div>
+    <div class="form-group">
+      <label>Type</label>
+      <select [(ngModel)]="editRoom.type" name="editRoomType">
+        <option value="" disabled>Select type</option>
+        <option>Classroom</option>
+        <option>Lab</option>
+        <option>Lecture Hall</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Capacity</label>
+      <input type="number" [(ngModel)]="editRoom.capacity" name="editRoomCapacity" />
+    </div>
+    <div class="form-group">
+      <label>Department (optional)</label>
+      <select [(ngModel)]="editRoom.department" name="editRoomDepartment">
+        <option value="">All Departments</option>
+        <option>Computer Science</option>
+        <option>Mathematics</option>
+        <option>Physics</option>
+        <option>Civil Engineering</option>
+        <option>Electrical Engineering</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select [(ngModel)]="editRoom.available" name="editRoomAvailable">
+        <option [ngValue]="true">Available</option>
+        <option [ngValue]="false">Unavailable</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="closeEditRoomModal()">Cancel</button>
+      <button class="btn-add" (click)="updateRoom()">Save Changes</button>
+    </div>
+  </div>
+</div>
 
 </div>

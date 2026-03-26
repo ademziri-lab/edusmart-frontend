@@ -16,6 +16,12 @@
       <div class="nav-item" [class.active]="activeSection === 'chat'" (click)="setSection('chat')">
         💬 Text My Teacher
       </div>
+      <div class="nav-item" [class.active]="activeSection === 'ai'" (click)="setSection('ai')">
+        🤖 AI Assistant
+      </div>
+      <div class="nav-item" [class.active]="activeSection === 'attendance'" (click)="setSection('attendance')">
+  📝 My Attendance
+</div>
       <div class="nav-item" [class.active]="activeSection === 'profile'" (click)="setSection('profile')">
         👤 My Profile
       </div>
@@ -44,30 +50,49 @@
       <div *ngIf="activeSection === 'timetable'">
         <div class="section-card">
           <div class="card-header">
-            <h3>My Class Timetable — DSI1</h3>
+            <h3>My Class Timetable</h3>
           </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Monday</th>
-                <th>Tuesday</th>
-                <th>Wednesday</th>
-                <th>Thursday</th>
-                <th>Friday</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let slot of timetable">
-                <td class="time-slot">{{ slot.time }}</td>
-                <td [class.subject-cell]="slot.monday !== '—'">{{ slot.monday }}</td>
-                <td [class.subject-cell]="slot.tuesday !== '—'">{{ slot.tuesday }}</td>
-                <td [class.subject-cell]="slot.wednesday !== '—'">{{ slot.wednesday }}</td>
-                <td [class.subject-cell]="slot.thursday !== '—'">{{ slot.thursday }}</td>
-                <td [class.subject-cell]="slot.friday !== '—'">{{ slot.friday }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="filter-row">
+            <select [(ngModel)]="selectedTimetableDepartment" name="timetableDeptFilter"
+              (ngModelChange)="selectedTimetableClass = ''">
+              <option value="">All Departments</option>
+              <option *ngFor="let dept of timetableDepartments" [value]="dept">{{ dept }}</option>
+            </select>
+          </div>
+          <div class="class-selector">
+            <button *ngFor="let c of filteredTimetableClasses"
+              [class.active]="selectedTimetableClass === c.name"
+              (click)="selectedTimetableClass = c.name">
+              {{ c.name }}
+            </button>
+          </div>
+          <div *ngIf="selectedTimetableClass">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Monday</th>
+                  <th>Tuesday</th>
+                  <th>Wednesday</th>
+                  <th>Thursday</th>
+                  <th>Friday</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let slot of getCurrentTimetable()">
+                  <td class="time-slot">{{ slot.time }}</td>
+                  <td [class.subject-cell]="slot.monday !== '—'">{{ slot.monday }}</td>
+                  <td [class.subject-cell]="slot.tuesday !== '—'">{{ slot.tuesday }}</td>
+                  <td [class.subject-cell]="slot.wednesday !== '—'">{{ slot.wednesday }}</td>
+                  <td [class.subject-cell]="slot.thursday !== '—'">{{ slot.thursday }}</td>
+                  <td [class.subject-cell]="slot.friday !== '—'">{{ slot.friday }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="!selectedTimetableClass" style="text-align:center; color: #a0b0c0; padding: 40px 0;">
+            Select a department and class to view the timetable.
+          </div>
         </div>
       </div>
 
@@ -87,7 +112,6 @@
             <span class="stat-label">Pending</span>
           </div>
         </div>
-
         <div class="section-card">
           <h3>My Assignments</h3>
           <table class="data-table">
@@ -108,12 +132,12 @@
                 <td>{{ a.subject }}</td>
                 <td>{{ a.dueDate }}</td>
                 <td>
-  <button *ngIf="a.fileData" class="btn-download"
-    (click)="downloadFile(a.fileData, a.fileName, a.fileType)">
-    📄 Download
-  </button>
-  <span *ngIf="!a.fileData">—</span>
-</td>
+                  <button *ngIf="a.fileData" class="btn-download"
+                    (click)="downloadFile(a.fileData, a.fileName, a.fileType)">
+                    📄 Download
+                  </button>
+                  <span *ngIf="!a.fileData">—</span>
+                </td>
                 <td>
                   <span *ngIf="!hasSubmitted(a)" class="badge pending">Not Submitted</span>
                   <span *ngIf="hasSubmitted(a) && getMySubmission(a)?.status === 'SUBMITTED'" class="badge approved">Submitted</span>
@@ -126,14 +150,12 @@
                   <span *ngIf="getMySubmission(a)?.grade === null || getMySubmission(a)?.grade === undefined">—</span>
                 </td>
                 <td>
-  <button *ngIf="!hasSubmitted(a)" class="btn-add" (click)="openSubmitModal(a)">
-    Submit
-  </button>
-  <button *ngIf="hasSubmitted(a)" class="btn-download"
-    (click)="downloadFile(getMySubmission(a).fileData, getMySubmission(a).fileName, getMySubmission(a).fileType)">
-    📄 My File
-  </button>
-</td>
+                  <button *ngIf="!hasSubmitted(a)" class="btn-add" (click)="openSubmitModal(a)">Submit</button>
+                  <button *ngIf="hasSubmitted(a)" class="btn-download"
+                    (click)="downloadFile(getMySubmission(a).fileData, getMySubmission(a).fileName, getMySubmission(a).fileType)">
+                    📄 My File
+                  </button>
+                </td>
               </tr>
               <tr *ngIf="assignments.length === 0">
                 <td colspan="7" style="text-align:center; color: #a0b0c0;">No assignments yet.</td>
@@ -215,6 +237,187 @@
         </div>
       </div>
 
+      <!-- AI Assistant Section -->
+      <div *ngIf="activeSection === 'ai'">
+        <div class="section-card chat-card">
+          <div class="card-header">
+            <h3> EduSmart AI Assistant</h3>
+            <span style="color: #a0b0c0; font-size: 0.82rem;">Powered by Qwen AI</span>
+          </div>
+          <div class="chat-messages">
+            <div *ngIf="aiMessages.length === 0" style="text-align: center; padding: 40px 20px;">
+              <div style="font-size: 3rem; margin-bottom: 16px;"></div>
+              <h4 style="color: #00d4ff; margin-bottom: 8px;">Hi {{ profile.firstName }}! I'm your EduSmart AI Assistant</h4>
+              <p style="color: #a0b0c0; font-size: 0.9rem; margin-bottom: 24px;">I have access to your assignments, grades, timetable and internship data. Ask me anything!</p>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+                <button class="ai-suggestion" (click)="aiInput = 'What assignments do I have pending?'; sendAiMessage()">
+                  📋 Pending assignments?
+                </button>
+                <button class="ai-suggestion" (click)="aiInput = 'What are my grades so far?'; sendAiMessage()">
+                  🎓 My grades?
+                </button>
+                <button class="ai-suggestion" (click)="aiInput = 'What is my timetable for this week?'; sendAiMessage()">
+                  📅 My timetable?
+                </button>
+                <button class="ai-suggestion" (click)="aiInput = 'What is the status of my internship request?'; sendAiMessage()">
+                  💼 Internship status?
+                </button>
+              </div>
+            </div>
+            <div *ngFor="let msg of aiMessages" class="message"
+              [class.sent]="msg.role === 'user'"
+              [class.received]="msg.role === 'assistant'">
+              <div class="message-bubble">
+                <span *ngIf="msg.role === 'assistant'" style="color: #00d4ff; font-size: 0.75rem; display: block; margin-bottom: 4px; font-weight: 600;">🤖 EduSmart AI</span>
+                {{ msg.content }}
+              </div>
+            </div>
+            <div *ngIf="aiLoading" class="message received">
+              <div class="message-bubble" style="color: #a0b0c0;">
+                Thinking...
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <label for="aiFileInput" style="cursor: pointer; padding: 6px 14px;
+                background: rgba(0, 212, 255, 0.08); color: #00d4ff;
+                border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 20px;
+                font-size: 0.8rem; font-family: Poppins, sans-serif;">
+                📄 Upload PDF
+              </label>
+              <input type="file" id="aiFileInput" accept=".pdf"
+                (change)="onAiFileSelected($event)"
+                style="display: none;" />
+              <span *ngIf="uploadedPdfName" style="color: #00d4ff; font-size: 0.8rem;">✓ {{ uploadedPdfName }}</span>
+              <span *ngIf="!uploadedPdfName" style="color: #a0b0c0; font-size: 0.78rem;">Upload a PDF to summarize or ask questions about it</span>
+            </div>
+            <div class="chat-input-row">
+              <input type="text" class="chat-input"
+                placeholder="Ask me anything..."
+                [(ngModel)]="aiInput"
+                (keyup.enter)="sendAiMessage()"
+                [disabled]="aiLoading" />
+              <button class="btn-send" (click)="sendAiMessage()" [disabled]="aiLoading">
+                {{ aiLoading ? '...' : 'Ask' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Attendance Section -->
+<div *ngIf="activeSection === 'attendance'">
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-number">{{ attendanceSummary.length }}</span>
+      <span class="stat-label">Total Subjects</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-number" style="color: #e74c3c;">{{ getTotalAbsences() }}</span>
+      <span class="stat-label">Total Absences</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-number" style="color: #e74c3c;">{{ getEliminatedCount() }}</span>
+      <span class="stat-label">Subjects at Risk</span>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h3>My Attendance per Subject</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Total Sessions</th>
+          <th>Present</th>
+          <th>Absent</th>
+          <th>Absence Rate</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of attendanceSummary"
+          [style.background]="s.eliminated ? 'rgba(231,76,60,0.04)' : s.absences === 3 ? 'rgba(239,159,39,0.04)' : 'transparent'">
+          <td style="font-weight: 500;">{{ s.subject }}</td>
+          <td>{{ s.total }}</td>
+          <td style="color: #27ae60;">{{ s.presences }}</td>
+          <td style="color: #e74c3c;">{{ s.absences }}</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;">
+                <div
+                  [style.width]="s.total > 0 ? (s.absences / s.total * 100) + '%' : '0%'"
+                  [style.background]="s.eliminated ? '#e74c3c' : s.absences === 3 ? '#ef9f27' : '#27ae60'"
+                  style="height: 100%; border-radius: 3px; transition: width 0.3s ease;">
+                </div>
+              </div>
+              <span style="font-size: 0.78rem; color: #a0b0c0; min-width: 32px;">
+                {{ s.total > 0 ? (s.absences / s.total * 100).toFixed(0) : 0 }}%
+              </span>
+            </div>
+          </td>
+          <td>
+            <span *ngIf="s.eliminated" class="badge rejected"
+              style="font-size: 0.75rem;">
+              ⚠ Eliminated
+            </span>
+            <span *ngIf="!s.eliminated && s.absences === 3" class="badge"
+              style="background: rgba(239,159,39,0.15); color: #ef9f27; font-size: 0.75rem;">
+              ⚡ Warning
+            </span>
+            <span *ngIf="!s.eliminated && s.absences < 3" class="badge approved"
+              style="font-size: 0.75rem;">
+              ✓ Good
+            </span>
+          </td>
+        </tr>
+        <tr *ngIf="attendanceSummary.length === 0">
+          <td colspan="6" style="text-align:center; color: #a0b0c0; padding: 30px;">
+            No attendance records yet.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Eliminated Warning -->
+  <div *ngIf="getEliminatedCount() > 0" style="margin-top: 16px; background: rgba(231,76,60,0.08);
+    border: 1px solid rgba(231,76,60,0.25); border-radius: 10px; padding: 16px 20px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 1.2rem;">⚠️</span>
+      <div>
+        <div style="font-size: 0.9rem; font-weight: 600; color: #e74c3c; margin-bottom: 4px;">
+          Elimination Warning
+        </div>
+        <div style="font-size: 0.82rem; color: #a0b0c0; line-height: 1.5;">
+          You have been eliminated from the final exam in
+          <strong style="color: #e8eaf0;">{{ getEliminatedCount() }} subject(s)</strong>
+          due to exceeding 4 absences. You may still sit the DS (mid-term) exam.
+          Please contact your teacher or administration for more information.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warning for 3 absences -->
+  <div *ngIf="!getEliminatedCount() && hasThreeAbsenceWarning()"
+    style="margin-top: 16px; background: rgba(239,159,39,0.08);
+    border: 1px solid rgba(239,159,39,0.25); border-radius: 10px; padding: 16px 20px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="font-size: 1.2rem;">⚡</span>
+      <div>
+        <div style="font-size: 0.9rem; font-weight: 600; color: #ef9f27; margin-bottom: 4px;">
+          Absence Warning
+        </div>
+        <div style="font-size: 0.82rem; color: #a0b0c0;">
+          You have 3 absences in one or more subjects. One more absence will result in elimination from the final exam.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
       <!-- Profile Section -->
       <div *ngIf="activeSection === 'profile'">
         <div class="section-card">

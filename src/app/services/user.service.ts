@@ -1,24 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  private apiUrl = 'http://localhost:8080/api';
+  private apiUrl = 'http://localhost:8080/api/users';
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) {}
+  constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'Authorization': `Bearer ${this.authService.getToken()}`
-    });
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
   getTeachers(): Observable<any[]> {
@@ -26,6 +21,24 @@ export class UserService {
   }
 
   getStudents(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/users/students`, { headers: this.getHeaders() });
+    return this.http.get<any[]>(`${this.apiUrl}/students`, { headers: this.getHeaders() });
+  }
+
+  // Assign one class to a student
+  assignClassToStudent(userId: string, className: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${userId}/assign-class`,
+      { className },
+      { headers: this.getHeaders() }
+    );
+  }
+  getUserByEmail(email: string): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/me/${email}`, { headers: this.getHeaders() });
+}
+  // Assign multiple classes to a teacher
+  assignClassesToTeacher(userId: string, assignedClasses: string[]): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${userId}/assign-classes`,
+      { assignedClasses },
+      { headers: this.getHeaders() }
+    );
   }
 }
