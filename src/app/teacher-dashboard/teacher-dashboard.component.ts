@@ -7,6 +7,7 @@ import { ChatService } from '../services/chat.service';
 import { UserService } from '../services/user.service';
 import { AssignmentService } from '../services/assignment.service';
 import { CollegeClassService } from '../services/college-class.service';
+import { AttendanceService } from '../services/attendance.service';
 
 interface TimetableSlot {
   time: string;
@@ -128,7 +129,8 @@ attendanceSaving: boolean = false;
     private authService: AuthService,
     private userService: UserService,
     private assignmentService: AssignmentService,
-    private classService: CollegeClassService
+    private classService: CollegeClassService,
+    private attendanceService: AttendanceService
   ) {}
 
   ngOnInit() {
@@ -292,10 +294,6 @@ attendanceSaving: boolean = false;
 
   getTotalSubmissions(): number {
     return this.assignments.reduce((t, a) => t + (a.submissions?.length || 0), 0);
-  }
-
-  getSubmissionStatus(assignment: any): string {
-    return assignment.submissions?.length + ' / ? submitted';
   }
 
   getSubmissionStatus(assignment: any): string {

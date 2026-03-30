@@ -8,6 +8,7 @@ import { UserService } from '../services/user.service';
 import { InternshipService } from '../services/internship.service';
 import { AssignmentService } from '../services/assignment.service';
 import { CollegeClassService } from '../services/college-class.service';
+import { AttendanceService } from '../services/attendance.service';
 
 interface TimetableSlot {
   time: string;
@@ -32,6 +33,7 @@ export class StudentDashboardComponent implements OnInit {
   currentUserId: string = '';
   currentUserName: string = '';
   studentClass: string = '';
+  mongoUserId: string = '';
 
   profile = {
     firstName: '',
@@ -74,6 +76,8 @@ export class StudentDashboardComponent implements OnInit {
     if (!this.selectedTimetableClass) return [];
     return this.timetables[this.selectedTimetableClass] || [];
   }
+  // Attendance
+attendanceSummary: any[] = [];
   // Classes
   classes: any[] = [];
   selectedTimetableDepartment: string = '';
@@ -128,7 +132,8 @@ uploadedPdfName: string = '';
     private userService: UserService,
     private internshipService: InternshipService,
     private assignmentService: AssignmentService,
-    private classService: CollegeClassService
+    private classService: CollegeClassService,
+    private attendanceService: AttendanceService
   ) {}
 
   ngOnInit() {
@@ -159,6 +164,13 @@ uploadedPdfName: string = '';
           this.currentMessages = [...this.currentMessages, message];
         }
       });
+      this.userService.getUserByEmail(this.currentUserId).subscribe({
+  next: (user: any) => {
+    this.mongoUserId = user.id;
+    this.loadAttendanceSummary();
+  },
+  error: (err) => console.error('Error getting user id:', err)
+});
       this.loadClasses();
       this.loadAssignments();
 
@@ -204,6 +216,7 @@ uploadedPdfName: string = '';
       case 'chat': return 'Chat with Teachers';
       case 'profile': return 'My Profile';
       case 'ai': return 'AI Assistant';
+      case 'attendance': return 'My Attendance';
       default: return 'Dashboard';
     }
   }
