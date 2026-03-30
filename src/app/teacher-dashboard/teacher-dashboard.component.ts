@@ -110,7 +110,12 @@ export class TeacherDashboardComponent implements OnInit {
     fileData: '',
     fileType: ''
   };
-
+  // Attendance
+showAttendanceModal: boolean = false;
+attendanceClass: string = '';
+attendanceSubject: string = '';
+attendanceStudents: any[] = [];
+attendanceSaving: boolean = false;
   // Chat
   students: any[] = [];
   selectedStudent: string = '';
@@ -187,7 +192,9 @@ export class TeacherDashboardComponent implements OnInit {
       case 'classroom': return 'Virtual Classroom';
       case 'chat': return 'Chat with Students';
       case 'profile': return 'My Profile';
+      case 'attendance': return 'Attendance';
       default: return 'Dashboard';
+
     }
   }
 
@@ -290,6 +297,77 @@ export class TeacherDashboardComponent implements OnInit {
   getSubmissionStatus(assignment: any): string {
     return assignment.submissions?.length + ' / ? submitted';
   }
+
+  getSubmissionStatus(assignment: any): string {
+    return assignment.submissions?.length + ' / ? submitted';
+  }
+  // ─── ATTENDANCE ───
+
+openAttendanceModal() {
+  this.attendanceClass = '';
+  this.attendanceSubject = '';
+  this.attendanceStudents = [];
+  this.showAttendanceModal = true;
+}
+
+closeAttendanceModal() {
+  this.showAttendanceModal = false;
+  this.attendanceStudents = [];
+}
+
+loadAttendanceStudents() {
+  if (!this.attendanceClass) return;
+  this.attendanceService.getStudentsByClass(this.attendanceClass).subscribe({
+    next: (data) => {
+      this.attendanceStudents = data.map(s => ({
+        ...s,
+        present: true
+      }));
+    },
+    error: (err) => console.error('Error loading students:', err)
+  });
+}
+
+toggleAttendance(studentId: string) {
+  const student = this.attendanceStudents.find(s => s.id === studentId);
+  if (student) student.present = !student.present;
+}
+
+saveAttendance() {
+  if (!this.attendanceClass || !this.attendanceSubject || this.attendanceStudents.length === 0) return;
+  this.attendanceSaving = true;
+
+  const payload = {
+    teacherId: this.teacherId,
+    teacherName: this.loggedInName,
+    className: this.attendanceClass,
+    subject: this.attendanceSubject,
+    records: this.attendanceStudents.map(s => ({
+      studentId: s.id,
+      studentName: s.firstName + ' ' + s.lastName,
+      present: s.present
+    }))
+  };
+
+  this.attendanceService.saveAttendance(payload).subscribe({
+    next: () => {
+      this.attendanceSaving = false;
+      this.closeAttendanceModal();
+    },
+    error: (err) => {
+      console.error('Error saving attendance:', err);
+      this.attendanceSaving = false;
+    }
+  });
+}
+
+getPresentCount(): number {
+  return this.attendanceStudents.filter(s => s.present).length;
+}
+
+getAbsentCount(): number {
+  return this.attendanceStudents.filter(s => !s.present).length;
+}
 
   // ─── CHAT ───
 

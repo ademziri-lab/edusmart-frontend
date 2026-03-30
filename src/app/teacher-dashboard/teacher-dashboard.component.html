@@ -10,6 +10,9 @@
       <div class="nav-item" [class.active]="activeSection === 'classroom'" (click)="setSection('classroom')">
         🏫 Virtual Classroom
       </div>
+      <div class="nav-item" [class.active]="activeSection === 'attendance'" (click)="setSection('attendance')">
+  📝 Attendance
+</div>
       <div class="nav-item" [class.active]="activeSection === 'chat'" (click)="setSection('chat')">
         💬 Chat with Students
       </div>
@@ -180,7 +183,25 @@
           </div>
         </div>
       </div>
-
+      <!-- Attendance Section -->
+<div *ngIf="activeSection === 'attendance'">
+  <div class="section-card">
+    <div class="card-header">
+      <h3>Take Attendance</h3>
+      <button class="btn-add" (click)="openAttendanceModal()">+ New Session</button>
+    </div>
+    <p style="color: #a0b0c0; font-size: 0.9rem; padding: 20px 0;">
+      Click "New Session" to take attendance for your current class.
+      Select the class and subject, then mark each student as present or absent.
+    </p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <div *ngFor="let c of assignedClasses" class="stat-card" style="cursor: default;">
+        <span class="stat-number">{{ c }}</span>
+        <span class="stat-label">Assigned Class</span>
+      </div>
+    </div>
+  </div>
+</div>
       <!-- Profile Section -->
       <div *ngIf="activeSection === 'profile'">
         <div class="section-card">
@@ -320,5 +341,12 @@
       </div>
     </div>
   </div>
+  <!-- Attendance Modal -->
+<div class="modal-overlay" *ngIf="showAttendanceModal" (click)="closeAttendanceModal()">
+  <div class="modal-card modal-large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>📝 New Attendance Session</h3>
+      <span class="modal-close" (click)="closeAttendanceModal()">✕</span>
+    </div>
 
 </div>

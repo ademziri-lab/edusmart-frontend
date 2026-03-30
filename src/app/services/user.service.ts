@@ -22,6 +22,7 @@ export class UserService {
 
   getStudents(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/students`, { headers: this.getHeaders() });
+<<<<<<< HEAD
   }
 
   // Assign one class to a student
@@ -32,6 +33,26 @@ export class UserService {
     );
   }
 
+  // Assign multiple classes to a teacher
+  assignClassesToTeacher(userId: string, assignedClasses: string[]): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${userId}/assign-classes`,
+      { assignedClasses },
+      { headers: this.getHeaders() }
+    );
+=======
+>>>>>>> friend/master
+  }
+
+  // Assign one class to a student
+  assignClassToStudent(userId: string, className: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${userId}/assign-class`,
+      { className },
+      { headers: this.getHeaders() }
+    );
+  }
+  getUserByEmail(email: string): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/me/${email}`, { headers: this.getHeaders() });
+}
   // Assign multiple classes to a teacher
   assignClassesToTeacher(userId: string, assignedClasses: string[]): Observable<any> {
     return this.http.put(`${this.apiUrl}/${userId}/assign-classes`,

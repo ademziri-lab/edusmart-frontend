@@ -74,7 +74,6 @@ export class StudentDashboardComponent implements OnInit {
     if (!this.selectedTimetableClass) return [];
     return this.timetables[this.selectedTimetableClass] || [];
   }
-
   // Classes
   classes: any[] = [];
   selectedTimetableDepartment: string = '';
@@ -162,6 +161,7 @@ uploadedPdfName: string = '';
       });
       this.loadClasses();
       this.loadAssignments();
+
       this.loadInternships();
     }
   }
@@ -207,7 +207,25 @@ uploadedPdfName: string = '';
       default: return 'Dashboard';
     }
   }
+  // ─── ATTENDANCE ───
+  hasThreeAbsenceWarning(): boolean {
+  return this.attendanceSummary.some(s => s.absences === 3 && !s.eliminated);
+}
+loadAttendanceSummary() {
+  if (!this.studentClass || !this.mongoUserId) return;
+  this.attendanceService.getStudentSummary(this.mongoUserId, this.studentClass).subscribe({
+    next: (data) => { this.attendanceSummary = data; },
+    error: (err) => console.error('Error loading attendance summary:', err)
+  });
+}
 
+getTotalAbsences(): number {
+  return this.attendanceSummary.reduce((t, s) => t + s.absences, 0);
+}
+
+getEliminatedCount(): number {
+  return this.attendanceSummary.filter(s => s.eliminated).length;
+}
   // ─── VIRTUAL CLASSROOM ───
 
   loadAssignments() {
